@@ -65,11 +65,17 @@ const FarmerOnboarding = () => {
                 throw new Error('Please select at least one crop');
             }
 
+            // Get email from user object or metadata
+            const userEmail = user?.email || user?.user_metadata?.email;
+            if (!userEmail) {
+                throw new Error('Email not found. Please try logging in again.');
+            }
+
             // Save farmer profile to Supabase
             const { data, error } = await farmerService.createFarmerProfile(
                 user.id,
                 {
-                    email: user.email,
+                    email: userEmail,
                     full_name: formData.fullName,
                     phone_number: formData.phoneNumber,
                     aadhaar_number: formData.documentType === 'Aadhaar Card' 

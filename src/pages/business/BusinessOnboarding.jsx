@@ -50,11 +50,17 @@ const BusinessOnboarding = () => {
                 throw new Error('Please fill in all financial details');
             }
 
+            // Get email from user object or metadata
+            const userEmail = user?.email || user?.user_metadata?.email;
+            if (!userEmail) {
+                throw new Error('Email not found. Please try logging in again.');
+            }
+
             // Save business profile to Supabase
             const { data, error } = await businessService.createBusinessProfile(
                 user.id,
                 {
-                    email: user.email,
+                    email: userEmail,
                     business_name: formData.companyName,
                     business_gst: formData.gstNumber,
                     business_type: formData.businessType || 'Agricultural Trader',

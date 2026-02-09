@@ -51,11 +51,17 @@ const BankOnboarding = () => {
                 throw new Error('Please fill in bank name and RBI license number');
             }
 
+            // Get email from user object or metadata
+            const userEmail = user?.email || user?.user_metadata?.email;
+            if (!userEmail) {
+                throw new Error('Email not found. Please try logging in again.');
+            }
+
             // Save bank profile to Supabase
             const { data, error } = await bankService.createBankProfile(
                 user.id,
                 {
-                    email: user.email,
+                    email: userEmail,
                     bank_name: formData.bankName,
                     branch_name: formData.headquartersCity || 'Main Branch',
                     bank_code: formData.rbiLicense,
