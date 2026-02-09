@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { ArrowLeft, Globe, Sprout, LogOut, User as UserIcon, ChevronDown, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, Globe, Sprout, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import SpotlightCard from './SpotlightCard';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -118,27 +119,13 @@ const Header = () => {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                {/* Theme Toggle */}
-                <button
+                {/* Theme Toggle with Spotlight Effect */}
+                <SpotlightCard
                     onClick={toggleTheme}
-                    style={{
-                        background: isDark ? '#FCD34D' : '#1E293B',
-                        border: '2px solid var(--border)',
-                        borderRadius: '50%',
-                        width: '40px',
-                        height: '40px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        color: isDark ? '#1E293B' : '#FCD34D',
-                        transition: 'all 0.3s ease',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                    }}
+                    isDark={isDark}
+                    spotlightColor={isDark ? 'rgba(74, 222, 128, 0.4)' : 'rgba(45, 90, 39, 0.3)'}
                     title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-                >
-                    {isDark ? <Sun size={20} /> : <Moon size={20} />}
-                </button>
+                />
 
                 <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-hover)', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}>
                     {['en', 'hi', 'mr'].map((lang) => (
