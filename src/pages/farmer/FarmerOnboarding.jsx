@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +23,16 @@ const FarmerOnboarding = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
     
+    // Get Google OAuth user info
+    const getGoogleUserInfo = () => {
+        const fullName = user?.user_metadata?.full_name || 
+                        user?.user_metadata?.name ||
+                        user?.identities?.[0]?.identity_data?.full_name ||
+                        user?.identities?.[0]?.identity_data?.name ||
+                        '';
+        return { fullName };
+    };
+    
     // Form data state
     const [formData, setFormData] = useState({
         documentType: 'Aadhaar Card',
@@ -33,6 +43,19 @@ const FarmerOnboarding = () => {
         location: '',
         selectedCrops: []
     });
+    
+    // Pre-fill form with Google OAuth data on mount
+    useEffect(() => {
+        if (user) {
+            const { fullName } = getGoogleUserInfo();
+            if (fullName) {
+                setFormData(prev => ({
+                    ...prev,
+                    fullName: fullName
+                }));
+            }
+        }
+    }, [user]);
 
     const handleNext = async () => {
         if (currentStep < steps.length - 1) {
