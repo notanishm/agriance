@@ -6,6 +6,7 @@ import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 import Header from './components/Header';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import RoleSelection from './pages/RoleSelection';
 import FarmerOnboarding from './pages/farmer/FarmerOnboarding';
 import BusinessOnboarding from './pages/business/BusinessOnboarding';
@@ -13,6 +14,7 @@ import FarmerDashboard from './pages/farmer/FarmerDashboard';
 import BusinessDashboard from './pages/business/BusinessDashboard';
 import BankOnboarding from './pages/bank/BankOnboarding';
 import BankDashboard from './pages/bank/BankDashboard';
+import AuthCallback from './pages/AuthCallback';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
               {/* Public routes */}
               <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
               <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+              <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/roles" element={<RoleSelection />} />
               
               {/* Onboarding routes - require authentication */}

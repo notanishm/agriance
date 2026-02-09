@@ -179,6 +179,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Sign in with Google OAuth
+  const signInWithGoogle = async () => {
+    try {
+      setError(null);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      const message = handleSupabaseError(error);
+      setError(message);
+      return { data: null, error: message };
+    }
+  };
+
   const value = {
     user,
     userProfile,
@@ -187,6 +211,7 @@ export const AuthProvider = ({ children }) => {
     signUp,
     signIn,
     signOut,
+    signInWithGoogle,
     resetPassword,
     updateProfile,
     updateUserMetadata,

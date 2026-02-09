@@ -249,7 +249,7 @@ const Header = () => {
                                 Login
                             </button>
                             <button
-                                onClick={() => navigate('/roles')}
+                                onClick={() => navigate('/register')}
                                 className="btn btn-primary"
                                 style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem' }}
                             >
