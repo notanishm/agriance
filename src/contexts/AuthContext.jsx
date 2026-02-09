@@ -54,10 +54,20 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // PGRST116 means no rows found - this is normal for new users
+        if (error.code === 'PGRST116') {
+          setUserProfile(null);
+          return;
+        }
+        throw error;
+      }
       setUserProfile(data);
     } catch (error) {
-      console.error('Error loading user profile:', error);
+      // Only log real errors, not "no profile found" for new users
+      if (error.code !== 'PGRST116') {
+        console.error('Error loading user profile:', error);
+      }
       setUserProfile(null);
     }
   };
