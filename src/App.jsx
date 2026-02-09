@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 import Header from './components/Header';
 import LandingPage from './pages/LandingPage';
@@ -18,12 +19,13 @@ import AuthCallback from './pages/AuthCallback';
 
 function App() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <Router>
-          <div className="app-container">
-            <Header />
-            <Routes>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <Router>
+            <div className="app-container">
+              <Header />
+              <Routes>
               {/* Public routes */}
               <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
               <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
@@ -90,6 +92,7 @@ function App() {
         </Router>
       </AuthProvider>
     </LanguageProvider>
+    </ThemeProvider>
   );
 }
 

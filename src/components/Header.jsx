@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { ArrowLeft, Globe, Sprout, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Globe, Sprout, LogOut, User as UserIcon, ChevronDown, Sun, Moon } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { language, setLanguage, t } = useTranslation();
     const { user, logout } = useAuth();
+    const { theme, toggleTheme, isDark } = useTheme();
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     const isLanding = location.pathname === '/';
@@ -116,6 +118,27 @@ const Header = () => {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                {/* Theme Toggle */}
+                <button
+                    onClick={toggleTheme}
+                    style={{
+                        background: 'var(--bg-hover)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '50%',
+                        width: '40px',
+                        height: '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        color: 'var(--text-main)',
+                        transition: 'all 0.2s ease'
+                    }}
+                    title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                    {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
+
                 <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(0,0,0,0.03)', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}>
                     {['en', 'hi', 'mr'].map((lang) => (
                         <button
@@ -196,7 +219,7 @@ const Header = () => {
                                             top: '100%',
                                             right: 0,
                                             marginTop: '0.5rem',
-                                            background: 'white',
+                                            background: 'var(--bg-card)',
                                             border: '1px solid var(--border)',
                                             borderRadius: 'var(--radius-md)',
                                             boxShadow: 'var(--shadow-lg)',

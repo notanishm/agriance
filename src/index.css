@@ -1,22 +1,54 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Colors - Agriance Palette */
+  /* Light Mode Colors - Default */
   --primary: #2D5A27;
-  /* Forest Green */
   --primary-light: #4A8B3F;
   --secondary: #D4AF37;
-  /* Metallic Gold */
   --accent: #F4A460;
-  /* Sandy Brown */
   --bg-main: #FDFCF8;
-  /* Bone White */
   --bg-card: #FFFFFF;
+  --bg-hover: #F3F4F6;
   --text-main: #1A1A1A;
   --text-muted: #666666;
+  --text-inverse: #FFFFFF;
   --border: #E5E7EB;
+  --border-light: #F3F4F6;
   --success: #10B981;
   --error: #EF4444;
+  --warning: #F59E0B;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --input-bg: #FFFFFF;
+  --input-border: #E5E7EB;
+  --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode Colors */
+.dark {
+  --primary: #4ADE80;
+  --primary-light: #22C55E;
+  --secondary: #FCD34D;
+  --accent: #FB923C;
+  --bg-main: #0F172A;
+  --bg-card: #1E293B;
+  --bg-hover: #334155;
+  --text-main: #F1F5F9;
+  --text-muted: #94A3B8;
+  --text-inverse: #0F172A;
+  --border: #334155;
+  --border-light: #1E293B;
+  --success: #22C55E;
+  --error: #EF4444;
+  --warning: #F59E0B;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --glass-bg: rgba(30, 41, 59, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --input-bg: #1E293B;
+  --input-border: #334155;
+  --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -74,11 +106,16 @@ a {
 
 /* Premium Utilities */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-glass);
+}
+
+/* Dark mode adjustments */
+.dark .glass {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }
 
 .gradient-text {
@@ -92,13 +129,19 @@ a {
   background: var(--bg-card);
   border-radius: var(--radius-md);
   padding: 2rem;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--card-shadow);
   transition: var(--transition);
+  border: 1px solid var(--border-light);
 }
 
 .card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
+}
+
+/* Dark mode card improvements */
+.dark .card {
+  border-color: var(--border);
 }
 
 .btn {
@@ -122,13 +165,18 @@ a {
 }
 
 .btn-secondary {
-  background: white;
+  background: var(--bg-card);
   color: var(--primary);
   border: 2px solid var(--primary);
 }
 
 .btn-secondary:hover {
-  background: rgba(45, 90, 39, 0.05);
+  background: rgba(74, 222, 128, 0.1);
+}
+
+/* Dark mode secondary button */
+.dark .btn-secondary:hover {
+  background: rgba(74, 222, 128, 0.2);
 }
 
 /* Animations */
@@ -187,7 +235,7 @@ a {
 }
 
 .locked-overlay {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--glass-bg);
   backdrop-filter: blur(4px);
   display: flex;
   flex-direction: column;
@@ -197,6 +245,50 @@ a {
   padding: 2rem;
   border-radius: var(--radius-md);
   border: 2px dashed var(--border);
+}
+
+/* Input styling for dark mode */
+input, textarea, select {
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--input-border);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Table styling for dark mode */
+.dark table {
+  color: var(--text-main);
+}
+
+.dark th {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.dark td {
+  border-color: var(--border);
+}
+
+/* Scrollbar styling for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .premium-gradient-bg {
