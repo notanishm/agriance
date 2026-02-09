@@ -3,9 +3,9 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 2px solid var(--primary, #2D5A27);
-  background-color: var(--bg-card, #ffffff);
-  display: flex;
+  border: 2px solid #2D5A27;
+  background-color: #ffffff;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   overflow: hidden;
@@ -13,6 +13,8 @@
   --mouse-y: 50%;
   --spotlight-color: rgba(74, 222, 128, 0.3);
   transition: all 0.3s ease;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .card-spotlight::before {
@@ -56,8 +58,9 @@
 }
 
 .spotlight-icon {
-  color: var(--primary, #2D5A27);
+  color: #2D5A27;
   transition: all 0.3s ease;
+  display: block;
 }
 
 .card-spotlight:hover .spotlight-icon {
