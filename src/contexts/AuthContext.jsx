@@ -62,16 +62,34 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Get the correct redirect URL based on environment
+  const getRedirectUrl = () => {
+    // Use Vercel URL if available, otherwise fallback to window.location.origin
+    const vercelUrl = import.meta.env.VITE_VERCEL_URL;
+    if (vercelUrl) {
+      return `https://${vercelUrl}/auth/callback`;
+    }
+    // For production deployment
+    if (window.location.hostname === 'agriance.vercel.app') {
+      return 'https://agriance.vercel.app/auth/callback';
+    }
+    // For local development
+    return `${window.location.origin}/auth/callback`;
+  };
+
   // Sign up with email and password
   const signUp = async (email, password, metadata = {}) => {
     try {
       setError(null);
+      const redirectUrl = getRedirectUrl();
+      console.log('Signup redirect URL:', redirectUrl);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: metadata,
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectUrl,
         },
       });
 
@@ -121,8 +139,10 @@ export const AuthProvider = ({ children }) => {
   const resetPassword = async (email) => {
     try {
       setError(null);
+      const redirectUrl = getRedirectUrl();
+      
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: redirectUrl,
       });
 
       if (error) throw error;
@@ -183,10 +203,13 @@ export const AuthProvider = ({ children }) => {
   const signInWithGoogle = async () => {
     try {
       setError(null);
+      const redirectUrl = getRedirectUrl();
+      console.log('Google OAuth redirect URL:', redirectUrl);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
