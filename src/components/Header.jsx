@@ -117,13 +117,13 @@ const Header = () => {
                 )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 {/* Theme Toggle */}
                 <button
                     onClick={toggleTheme}
                     style={{
-                        background: 'var(--bg-hover)',
-                        border: '1px solid var(--border)',
+                        background: isDark ? '#FCD34D' : '#1E293B',
+                        border: '2px solid var(--border)',
                         borderRadius: '50%',
                         width: '40px',
                         height: '40px',
@@ -131,15 +131,16 @@ const Header = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        color: 'var(--text-main)',
-                        transition: 'all 0.2s ease'
+                        color: isDark ? '#1E293B' : '#FCD34D',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                     }}
                     title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                 >
                     {isDark ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
 
-                <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(0,0,0,0.03)', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-hover)', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}>
                     {['en', 'hi', 'mr'].map((lang) => (
                         <button
                             key={lang}
