@@ -120,16 +120,20 @@ const Header = () => {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 {/* Theme Toggle with Spotlight Effect */}
-                <div style={{ display: 'block' }}>
+                <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    marginRight: '0.5rem'
+                }}>
                     <SpotlightCard
                         onClick={toggleTheme}
                         isDark={isDark}
-                        spotlightColor={isDark ? 'rgba(74, 222, 128, 0.4)' : 'rgba(45, 90, 39, 0.3)'}
+                        spotlightColor={isDark ? 'rgba(74, 222, 128, 0.5)' : 'rgba(45, 90, 39, 0.4)'}
                         title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                     />
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-hover)', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}
+                <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-hover)', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}>
                     {['en', 'hi', 'mr'].map((lang) => (
                         <button
                             key={lang}
