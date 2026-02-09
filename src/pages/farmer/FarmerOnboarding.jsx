@@ -43,6 +43,27 @@ const FarmerOnboarding = () => {
         }
     };
 
+    // Extract user info from Google OAuth or regular auth
+    const getUserInfo = () => {
+        console.log('User object:', user);
+        console.log('User metadata:', user?.user_metadata);
+        
+        // Try multiple locations for email
+        const email = user?.email || 
+                     user?.user_metadata?.email || 
+                     user?.user_metadata?.user_name ||
+                     user?.identities?.[0]?.identity_data?.email;
+        
+        // Try multiple locations for name
+        const fullName = user?.user_metadata?.full_name || 
+                        user?.user_metadata?.name ||
+                        user?.user_metadata?.user_name ||
+                        user?.identities?.[0]?.identity_data?.full_name ||
+                        user?.identities?.[0]?.identity_data?.name;
+        
+        return { email, fullName };
+    };
+
     const handleSubmit = async () => {
         setIsSubmitting(true);
         setError(null);
@@ -65,18 +86,23 @@ const FarmerOnboarding = () => {
                 throw new Error('Please select at least one crop');
             }
 
-            // Get email from user object or metadata
-            const userEmail = user?.email || user?.user_metadata?.email;
+            // Get email and name from user object
+            const { email: userEmail, fullName: googleName } = getUserInfo();
+            
             if (!userEmail) {
+                console.error('Could not find email in user object:', user);
                 throw new Error('Email not found. Please try logging in again.');
             }
+
+            console.log('Using email:', userEmail);
+            console.log('Google name:', googleName);
 
             // Save farmer profile to Supabase
             const { data, error } = await farmerService.createFarmerProfile(
                 user.id,
                 {
                     email: userEmail,
-                    full_name: formData.fullName,
+                    full_name: formData.fullName || googleName,
                     phone_number: formData.phoneNumber,
                     aadhaar_number: formData.documentType === 'Aadhaar Card' 
                         ? formData.documentNumber 

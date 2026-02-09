@@ -36,6 +36,25 @@ const BusinessOnboarding = () => {
         }
     };
 
+    // Extract user info from Google OAuth or regular auth
+    const getUserInfo = () => {
+        console.log('User object:', user);
+        console.log('User metadata:', user?.user_metadata);
+        
+        const email = user?.email || 
+                     user?.user_metadata?.email || 
+                     user?.user_metadata?.user_name ||
+                     user?.identities?.[0]?.identity_data?.email;
+        
+        const fullName = user?.user_metadata?.full_name || 
+                        user?.user_metadata?.name ||
+                        user?.user_metadata?.user_name ||
+                        user?.identities?.[0]?.identity_data?.full_name ||
+                        user?.identities?.[0]?.identity_data?.name;
+        
+        return { email, fullName };
+    };
+
     const handleSubmit = async () => {
         setIsSubmitting(true);
         setError(null);
@@ -50,11 +69,15 @@ const BusinessOnboarding = () => {
                 throw new Error('Please fill in all financial details');
             }
 
-            // Get email from user object or metadata
-            const userEmail = user?.email || user?.user_metadata?.email;
+            // Get email from user object
+            const { email: userEmail, fullName: googleName } = getUserInfo();
+            
             if (!userEmail) {
+                console.error('Could not find email in user object:', user);
                 throw new Error('Email not found. Please try logging in again.');
             }
+
+            console.log('Using email:', userEmail);
 
             // Save business profile to Supabase
             const { data, error } = await businessService.createBusinessProfile(
