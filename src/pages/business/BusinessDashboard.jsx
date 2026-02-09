@@ -37,7 +37,7 @@ const BusinessDashboard = () => {
                 setError(null);
 
                 // Fetch available farmers (for marketplace)
-                const { data: farmersData, error: farmersError } = await businessService.searchFarmers({});
+                const { data: farmersData, error: farmersError } = await businessService.searchFarmers('');
                 if (farmersError) throw farmersError;
                 setFarmers(farmersData || []);
 

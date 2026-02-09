@@ -324,14 +324,19 @@ export const dbUtils = {
   },
 
   // Search for farmers
-  async searchFarmers(searchTerm) {
+  async searchFarmers(searchTerm = '') {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('profiles')
-        .select('id, full_name, phone_number, location')
-        .eq('role', 'farmer')
-        .or(`full_name.ilike.%${searchTerm}%,phone_number.ilike.%${searchTerm}%`)
-        .limit(10);
+        .select('id, full_name, phone_number, location, land_size, crops_history, rating')
+        .eq('role', 'farmer');
+      
+      // Only add search filter if searchTerm is provided
+      if (searchTerm && searchTerm.trim() !== '') {
+        query = query.or(`full_name.ilike.%${searchTerm}%,phone_number.ilike.%${searchTerm}%`);
+      }
+      
+      const { data, error } = await query.limit(20);
 
       if (error) throw error;
       return { data, error: null };
