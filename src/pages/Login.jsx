@@ -52,7 +52,7 @@ const Login = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #2d5a27 0%, #4a7c3f 100%)',
+        background: 'var(--bg-main)',
         padding: '2rem',
       }}
     >
@@ -65,7 +65,8 @@ const Login = () => {
           maxWidth: '450px',
           width: '100%',
           padding: '3rem',
-          background: 'white',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -84,7 +85,7 @@ const Login = () => {
           >
             <LogIn size={32} />
           </div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
+          <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
             Welcome Back
           </h1>
           <p style={{ color: 'var(--text-muted)' }}>

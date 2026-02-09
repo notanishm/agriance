@@ -106,7 +106,7 @@ const Register = () => {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+      background: 'var(--bg-main)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -118,7 +118,8 @@ const Register = () => {
         style={{
           width: '100%',
           maxWidth: '480px',
-          background: 'white',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: '24px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
           overflow: 'hidden'
