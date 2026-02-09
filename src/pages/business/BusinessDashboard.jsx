@@ -30,7 +30,10 @@ const BusinessDashboard = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!user) return;
+            if (!user) {
+                setLoading(false);
+                return;
+            }
             
             try {
                 setLoading(true);
@@ -38,28 +41,49 @@ const BusinessDashboard = () => {
 
                 // Fetch available farmers (for marketplace)
                 const { data: farmersData, error: farmersError } = await businessService.searchFarmers('');
-                if (farmersError) throw farmersError;
-                setFarmers(farmersData || []);
+                if (farmersError) {
+                    console.error('Farmers fetch error:', farmersError);
+                    // Don't throw - just set empty array
+                    setFarmers([]);
+                } else {
+                    setFarmers(farmersData || []);
+                }
 
                 // Fetch business contracts
                 const { data: contractsData, error: contractsError } = await businessService.getBusinessContracts(user.id);
-                if (contractsError) throw contractsError;
-                setContracts(contractsData || []);
+                if (contractsError) {
+                    console.error('Contracts fetch error:', contractsError);
+                    setContracts([]);
+                } else {
+                    setContracts(contractsData || []);
+                }
 
                 // Fetch business profile
                 const { data: profileData, error: profileError } = await businessService.getBusinessProfile(user.id);
-                if (profileError) throw profileError;
-                setProfile(profileData);
+                if (profileError) {
+                    console.error('Profile fetch error:', profileError);
+                    // Profile might not exist yet, that's ok
+                    setProfile(null);
+                } else {
+                    setProfile(profileData);
+                }
 
             } catch (err) {
                 console.error('Error fetching business data:', err);
-                setError(err.message);
+                setError(err.message || 'Failed to load dashboard data');
             } finally {
                 setLoading(false);
             }
         };
 
+        // Add timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+            setLoading(false);
+        }, 10000); // 10 second timeout
+
         fetchData();
+
+        return () => clearTimeout(timeoutId);
     }, [user]);
 
     // Calculate stats from real data
@@ -75,7 +99,7 @@ const BusinessDashboard = () => {
 
     if (loading) {
         return (
-            <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ minHeight: '100vh', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
                     <p style={{ color: 'var(--text-muted)' }}>Loading your dashboard...</p>
@@ -86,11 +110,11 @@ const BusinessDashboard = () => {
 
     if (error) {
         return (
-            <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '3rem 4rem' }}>
-                <div className="card" style={{ padding: '2rem', maxWidth: '600px', margin: '2rem auto', border: '1px solid #ef4444' }}>
+            <div style={{ minHeight: '100vh', background: 'var(--bg-main)', padding: '3rem 4rem' }}>
+                <div className="card" style={{ padding: '2rem', maxWidth: '600px', margin: '2rem auto', border: '1px solid #ef4444', background: 'var(--bg-card)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', marginBottom: '1rem' }}>
                         <AlertCircle size={24} />
-                        <h3 style={{ margin: 0 }}>Error Loading Dashboard</h3>
+                        <h3 style={{ margin: 0, color: 'var(--text-main)' }}>Error Loading Dashboard</h3>
                     </div>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{error}</p>
                     <button className="btn btn-primary" onClick={() => window.location.reload()}>Retry</button>
@@ -100,7 +124,7 @@ const BusinessDashboard = () => {
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
             {/* Tab Navigation */}
             <div style={{ background: 'white', borderBottom: '1px solid var(--border)', padding: '0 4rem' }}>
                 <div style={{ display: 'flex', gap: '2rem' }}>
