@@ -15,7 +15,7 @@ const steps = [
 
 const FarmerOnboarding = () => {
     const { t } = useTranslation();
-    const { user } = useAuth();
+    const { user, updateProfile } = useAuth();
     const navigate = useNavigate();
     
     const [currentStep, setCurrentStep] = useState(0);
@@ -143,6 +143,14 @@ const FarmerOnboarding = () => {
             if (error) {
                 throw new Error(error);
             }
+
+            // Update the profile in AuthContext
+            await updateProfile({
+                role: 'farmer',
+                onboarding_completed: true,
+                full_name: formData.fullName,
+                land_size: parseFloat(formData.landSize),
+            });
 
             // Success - navigate to dashboard
             navigate('/farmer/dashboard');

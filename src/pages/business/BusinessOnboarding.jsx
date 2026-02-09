@@ -9,7 +9,7 @@ import { businessService } from '../../services/database';
 
 const BusinessOnboarding = () => {
     const { t } = useTranslation();
-    const { user } = useAuth();
+    const { user, updateProfile } = useAuth();
     const navigate = useNavigate();
     
     const [step, setStep] = useState(1);
@@ -119,6 +119,14 @@ const BusinessOnboarding = () => {
             if (error) {
                 throw new Error(error);
             }
+
+            // Update the profile in AuthContext
+            await updateProfile({
+                role: 'business',
+                onboarding_completed: true,
+                business_name: formData.companyName,
+                business_gst: formData.gstNumber,
+            });
 
             // Success - navigate to dashboard
             navigate('/business/dashboard');

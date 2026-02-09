@@ -15,7 +15,7 @@ const steps = [
 
 const BankOnboarding = () => {
     const { t } = useTranslation();
-    const { user } = useAuth();
+    const { user, updateProfile } = useAuth();
     const navigate = useNavigate();
     
     const [currentStep, setCurrentStep] = useState(0);
@@ -118,6 +118,13 @@ const BankOnboarding = () => {
             if (error) {
                 throw new Error(error);
             }
+
+            // Update the profile in AuthContext
+            await updateProfile({
+                role: 'bank',
+                onboarding_completed: true,
+                bank_name: formData.bankName,
+            });
 
             // Success - navigate to dashboard
             navigate('/bank/dashboard');
