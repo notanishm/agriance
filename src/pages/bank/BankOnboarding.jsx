@@ -55,6 +55,7 @@ const BankOnboarding = () => {
             const { data, error } = await bankService.createBankProfile(
                 user.id,
                 {
+                    email: user.email,
                     bank_name: formData.bankName,
                     branch_name: formData.headquartersCity || 'Main Branch',
                     bank_code: formData.rbiLicense,

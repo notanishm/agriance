@@ -54,6 +54,7 @@ const BusinessOnboarding = () => {
             const { data, error } = await businessService.createBusinessProfile(
                 user.id,
                 {
+                    email: user.email,
                     business_name: formData.companyName,
                     business_gst: formData.gstNumber,
                     business_type: formData.businessType || 'Agricultural Trader',

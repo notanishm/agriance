@@ -69,6 +69,7 @@ const FarmerOnboarding = () => {
             const { data, error } = await farmerService.createFarmerProfile(
                 user.id,
                 {
+                    email: user.email,
                     full_name: formData.fullName,
                     phone_number: formData.phoneNumber,
                     aadhaar_number: formData.documentType === 'Aadhaar Card' 
