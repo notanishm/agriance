@@ -39,33 +39,48 @@ const BusinessDashboard = () => {
                 setLoading(true);
                 setError(null);
 
-                // Fetch available farmers (for marketplace)
-                const { data: farmersData, error: farmersError } = await businessService.searchFarmers('');
-                if (farmersError) {
-                    console.error('Farmers fetch error:', farmersError);
-                    // Don't throw - just set empty array
-                    setFarmers([]);
+                // Debug: log businessService keys
+                console.log('businessService keys:', Object.keys(businessService || {}));
+                console.log('searchFarmers type:', typeof businessService?.searchFarmers);
+
+                // Fetch available farmers (for marketplace) - with defensive check
+                if (typeof businessService?.searchFarmers === 'function') {
+                    const { data: farmersData, error: farmersError } = await businessService.searchFarmers('');
+                    if (farmersError) {
+                        console.error('Farmers fetch error:', farmersError);
+                        setFarmers([]);
+                    } else {
+                        setFarmers(farmersData || []);
+                    }
                 } else {
-                    setFarmers(farmersData || []);
+                    console.error('searchFarmers missing on businessService', businessService);
+                    setFarmers([]);
                 }
 
                 // Fetch business contracts
-                const { data: contractsData, error: contractsError } = await businessService.getBusinessContracts(user.id);
-                if (contractsError) {
-                    console.error('Contracts fetch error:', contractsError);
-                    setContracts([]);
+                if (typeof businessService?.getBusinessContracts === 'function') {
+                    const { data: contractsData, error: contractsError } = await businessService.getBusinessContracts(user.id);
+                    if (contractsError) {
+                        console.error('Contracts fetch error:', contractsError);
+                        setContracts([]);
+                    } else {
+                        setContracts(contractsData || []);
+                    }
                 } else {
-                    setContracts(contractsData || []);
+                    setContracts([]);
                 }
 
                 // Fetch business profile
-                const { data: profileData, error: profileError } = await businessService.getBusinessProfile(user.id);
-                if (profileError) {
-                    console.error('Profile fetch error:', profileError);
-                    // Profile might not exist yet, that's ok
-                    setProfile(null);
+                if (typeof businessService?.getBusinessProfile === 'function') {
+                    const { data: profileData, error: profileError } = await businessService.getBusinessProfile(user.id);
+                    if (profileError) {
+                        console.error('Profile fetch error:', profileError);
+                        setProfile(null);
+                    } else {
+                        setProfile(profileData);
+                    }
                 } else {
-                    setProfile(profileData);
+                    setProfile(null);
                 }
 
             } catch (err) {
