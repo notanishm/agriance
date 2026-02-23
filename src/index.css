@@ -57,6 +57,23 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html, body, #root, .app-container {
+  min-height: 100vh;
+  background-color: var(--bg-main) !important;
+}
+
+/* Force dark background on all major elements when dark mode is active */
+.dark html, 
+.dark body, 
+.dark #root, 
+.dark .app-container,
+.dark div,
+.dark main,
+.dark section,
+.dark article {
+  background-color: var(--bg-main) !important;
+}
+
 html, body {
   font-family: 'DM Sans', sans-serif;
   background-color: var(--bg-main) !important;

@@ -65,6 +65,7 @@ const Login = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '1.5rem',
+      backgroundColor: 'var(--bg-main)',
     }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}

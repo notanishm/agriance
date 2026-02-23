@@ -20,7 +20,7 @@ const LandingPage = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '1.5rem',
-      background: 'var(--bg-main)',
+      backgroundColor: 'var(--bg-main)',
     }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
