@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from '../contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Globe, ArrowRight } from 'lucide-react';
+import { Sprout, Globe, ArrowRight, Leaf } from 'lucide-react';
 
 const LandingPage = () => {
   const { setLanguage, t } = useTranslation();
@@ -14,76 +14,116 @@ const LandingPage = () => {
   };
 
   return (
-    <div style={{
+    <div className="agri-pattern" style={{
       minHeight: '100vh',
       display: 'flex',
-      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '2rem',
+      padding: '1.5rem',
+      background: 'var(--bg-main)',
     }}>
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        style={{ textAlign: 'center', maxWidth: '500px' }}
+        transition={{ duration: 0.5 }}
+        style={{ width: '100%', maxWidth: '400px' }}
       >
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          marginBottom: '1.5rem',
-          padding: '0.5rem 1rem',
-          background: 'rgba(45, 90, 39, 0.05)',
-          borderRadius: '999px',
-          color: 'var(--primary)',
-          fontSize: '0.9rem',
-          fontWeight: '600'
-        }}>
-          <Globe size={18} />
-          <span>Agriance Platform</span>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring' }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '72px',
+              height: '72px',
+              background: 'linear-gradient(135deg, var(--primary) 0%, #15803d 100%)',
+              borderRadius: '20px',
+              marginBottom: '1.25rem',
+              boxShadow: '0 8px 20px rgba(22, 101, 52, 0.3)'
+            }}
+          >
+            <Sprout size={36} color="white" />
+          </motion.div>
+          
+          <h1 style={{
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: 'var(--text-main)',
+            marginBottom: '0.5rem',
+            letterSpacing: '-0.02em'
+          }}>
+            Agriance
+          </h1>
+          
+          <p style={{
+            fontSize: '0.95rem',
+            color: 'var(--text-muted)',
+          }}>
+            {t('landing.subtitle')}
+          </p>
         </div>
 
-        <h1 className="gradient-text" style={{
-          fontSize: '3rem',
-          fontWeight: '700',
-          marginBottom: '1rem'
+        <div className="card" style={{
+          padding: '1.5rem',
         }}>
-          {t('landing.title')}
-        </h1>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem',
+            marginBottom: '1.25rem',
+            color: 'var(--text-muted)',
+            fontSize: '0.85rem',
+            fontWeight: '500'
+          }}>
+            <Globe size={16} />
+            <span>{t('landing.choose_language')}</span>
+          </div>
 
-        <p style={{
-          fontSize: '1.1rem',
-          color: 'var(--text-muted)',
-          marginBottom: '2rem'
-        }}>
-          {t('landing.subtitle')}
-        </p>
-
-        <div className="glass" style={{
-          padding: '2rem',
-          borderRadius: 'var(--radius-lg)'
-        }}>
-          <h2 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>{t('landing.choose_language')}</h2>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {['en', 'hi', 'mr'].map((lang) => (
-              <button
-                key={lang}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            {[
+              { code: 'en', label: 'English', flag: '🇺🇸' },
+              { code: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+              { code: 'mr', label: 'मराठी', flag: '🇮🇳' }
+            ].map((lang, i) => (
+              <motion.button
+                key={lang.code}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleLanguageSelect(lang.code)}
                 className="btn btn-secondary"
-                onClick={() => handleLanguageSelect(lang)}
                 style={{
                   justifyContent: 'space-between',
-                  padding: '1rem 1.5rem',
-                  fontSize: '1rem'
+                  padding: '0.85rem 1rem',
+                  fontSize: '0.95rem',
+                  width: '100%',
                 }}
               >
-                <span>{lang === 'en' ? 'English' : lang === 'hi' ? 'हिन्दी' : 'मराठी'}</span>
-                <ArrowRight size={18} />
-              </button>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <span style={{ fontSize: '1.2rem' }}>{lang.flag}</span>
+                  <span>{lang.label}</span>
+                </span>
+                <ArrowRight size={16} />
+              </motion.button>
             ))}
           </div>
         </div>
+
+        <p style={{
+          textAlign: 'center',
+          marginTop: '1.5rem',
+          fontSize: '0.8rem',
+          color: 'var(--text-muted)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.3rem'
+        }}>
+          <Leaf size={14} style={{ color: 'var(--primary)' }} />
+          Connecting farmers & businesses
+        </p>
       </motion.div>
     </div>
   );

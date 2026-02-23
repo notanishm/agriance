@@ -47,15 +47,17 @@ const Header = () => {
     };
 
     return (
-        <header className="glass" style={{
-            padding: '0.75rem 2rem',
+        <header style={{
+            padding: '0.5rem 1.25rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             position: 'sticky',
             top: 0,
             zIndex: 1000,
-            height: '70px'
+            height: '56px',
+            background: 'var(--bg-card)',
+            borderBottom: '1px solid var(--border)',
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                 {/* Back Button */}

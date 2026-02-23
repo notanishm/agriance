@@ -10,60 +10,84 @@ const AuthCallback = () => {
   const [message, setMessage] = useState('Processing authentication...');
 
   useEffect(() => {
+    let isMounted = true;
+    
     const handleAuthCallback = async () => {
       try {
-        // Get the session from the URL hash
+        // Check for session - Supabase stores it automatically after OAuth redirect
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) throw error;
         
-        if (session) {
-          // User is authenticated
+        if (session && isMounted) {
           setStatus('success');
           setMessage('Authentication successful! Redirecting...');
           
+          // Small delay to ensure session is fully processed
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
           // Get user profile to determine role
-          const { data: profile, error: profileError } = await supabase
+          const { data: profile } = await supabase
             .from('profiles')
             .select('role, onboarding_completed')
             .eq('id', session.user.id)
             .single();
           
-          if (profileError || !profile) {
-            // New user - need to complete onboarding
-            setTimeout(() => {
-              navigate('/roles');
-            }, 1500);
+          if (!profile) {
+            setTimeout(() => navigate('/roles'), 1500);
           } else if (!profile.onboarding_completed) {
-            // User exists but hasn't completed onboarding
-            setTimeout(() => {
-              navigate(`/${profile.role}/register`);
-            }, 1500);
+            setTimeout(() => navigate(`/${profile.role}/register`), 1500);
           } else {
-            // User is fully set up - go to dashboard
-            setTimeout(() => {
-              navigate(`/${profile.role}/dashboard`);
-            }, 1500);
+            setTimeout(() => navigate(`/${profile.role}/dashboard`), 1500);
           }
-        } else {
-          // No session found
-          setStatus('error');
-          setMessage('Authentication failed. Please try again.');
+        } else if (isMounted) {
+          // No session - try to listen for auth changes (for OAuth)
+          const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session && isMounted) {
+              subscription.unsubscribe();
+              setStatus('success');
+              setMessage('Authentication successful! Redirecting...');
+              
+              await new Promise(resolve => setTimeout(resolve, 500));
+              
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('role, onboarding_completed')
+                .eq('id', session.user.id)
+                .single();
+              
+              if (!profile) {
+                setTimeout(() => navigate('/roles'), 1500);
+              } else if (!profile.onboarding_completed) {
+                setTimeout(() => navigate(`/${profile.role}/register`), 1500);
+              } else {
+                setTimeout(() => navigate(`/${profile.role}/dashboard`), 1500);
+              }
+            }
+          });
+          
+          // If no session after 3 seconds, show error
           setTimeout(() => {
-            navigate('/login');
-          }, 2000);
+            if (isMounted && status !== 'success') {
+              setStatus('error');
+              setMessage('Authentication failed. Please try again.');
+              setTimeout(() => navigate('/login'), 2000);
+            }
+          }, 3000);
         }
       } catch (error) {
         console.error('Auth callback error:', error);
-        setStatus('error');
-        setMessage(error.message || 'Authentication failed');
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+        if (isMounted) {
+          setStatus('error');
+          setMessage(error.message || 'Authentication failed');
+          setTimeout(() => navigate('/login'), 2000);
+        }
       }
     };
 
     handleAuthCallback();
+    
+    return () => { isMounted = false; };
   }, [navigate]);
 
   return (
