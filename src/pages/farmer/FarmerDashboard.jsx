@@ -3,11 +3,13 @@ import { useTranslation } from '../../contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { Bell, Wallet, FileCheck, Tractor, TrendingUp, ShieldCheck, Microscope, ThermometerSun, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { farmerService } from '../../services/database';
 
 const FarmerDashboard = () => {
     const { t } = useTranslation();
     const { user } = useAuth();
+    const { isDark } = useTheme();
     const [contracts, setContracts] = useState([]);
     const [loans, setLoans] = useState([]);
     const [profile, setProfile] = useState(null);
@@ -142,7 +144,7 @@ const FarmerDashboard = () => {
                     <div className="card" style={{ 
                         padding: '1.5rem', 
                         marginBottom: '2rem',
-                        background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+                        background: isDark ? 'linear-gradient(135deg, #451a03 0%, #78350f 100%)' : 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
                         border: '1px solid #fed7aa'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
@@ -151,8 +153,8 @@ const FarmerDashboard = () => {
                                     <AlertCircle size={24} />
                                 </div>
                                 <div>
-                                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#9a3412' }}>Complete your profile ({completionPercent}%)</h3>
-                                    <p style={{ margin: '0.25rem 0 0', color: '#c2410c', fontSize: '0.9rem' }}>
+                                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: isDark ? '#fdba74' : '#9a3412' }}>Complete your profile ({completionPercent}%)</h3>
+                                    <p style={{ margin: '0.25rem 0 0', color: isDark ? '#fed7aa' : '#c2410c', fontSize: '0.9rem' }}>
                                         Missing: {missingFields.join(', ')}
                                     </p>
                                 </div>
