@@ -10,14 +10,14 @@ const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { language, setLanguage, t } = useTranslation();
-    const { user, logout } = useAuth();
+    const { user, signOut } = useAuth();
     const { theme, toggleTheme, isDark } = useTheme();
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     const isLanding = location.pathname === '/';
 
     const handleLogout = async () => {
-        await logout();
+        await signOut();
         navigate('/');
     };
 
