@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LogIn, Mail, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -27,8 +28,20 @@ const Login = () => {
       setError(error);
       setIsLoading(false);
     } else {
-      // Successfully logged in, navigate to intended page
-      navigate(from, { replace: true });
+      // Check if user has profile and redirect accordingly
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, onboarding_completed')
+        .eq('id', data.user.id)
+        .single();
+      
+      if (profile?.onboarding_completed) {
+        navigate(`/${profile.role}/dashboard`, { replace: true });
+      } else if (profile?.role) {
+        navigate(`/${profile.role}/register`, { replace: true });
+      } else {
+        navigate('/roles', { replace: true });
+      }
     }
   };
 
