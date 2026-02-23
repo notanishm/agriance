@@ -39,10 +39,15 @@ const Login = () => {
       if (error) {
         setError(error);
       }
-      // Google OAuth will redirect, so no need to navigate here
     } catch (err) {
       setError(err.message || 'Failed to sign in with Google');
     }
+  };
+
+  // Test user login
+  const handleTestLogin = () => {
+    setEmail('hello@agriance.com');
+    setPassword('1234');
   };
 
   return (
@@ -227,6 +232,25 @@ const Login = () => {
             }}
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
+          </button>
+
+          {/* Test Login Button */}
+          <button
+            type="button"
+            onClick={handleTestLogin}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              fontSize: '0.85rem',
+              marginBottom: '1.5rem',
+              background: 'rgba(45, 90, 39, 0.1)',
+              color: 'var(--primary)',
+              border: '1px dashed var(--primary)',
+              borderRadius: 'var(--radius-sm)',
+              cursor: 'pointer',
+            }}
+          >
+            Use Test Account (hello / 1234)
           </button>
 
           {/* Divider */}

@@ -116,6 +116,26 @@ export const AuthProvider = ({ children }) => {
   const signIn = async (email, password) => {
     try {
       setError(null);
+
+      // Test user bypass - for testing only
+      if (email === 'hello@agriance.com' && password === '1234') {
+        const testUser = {
+          id: '00000000-0000-0000-0000-000000000001',
+          email: 'hello@agriance.com',
+          user_metadata: { full_name: 'Test User' }
+        };
+        setUser(testUser);
+        setUserProfile({
+          id: '00000000-0000-0000-0000-000000000001',
+          email: 'hello@agriance.com',
+          full_name: 'Test User',
+          role: 'farmer',
+          onboarding_completed: true,
+          kyc_status: 'verified'
+        });
+        return { data: { user: testUser }, error: null };
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
