@@ -115,16 +115,9 @@ const FarmerOnboarding = () => {
                     email: userEmail,
                     full_name: formData.fullName || googleName,
                     phone_number: formData.phoneNumber,
-                    aadhaar_number: formData.documentType === 'Aadhaar Card' 
-                        ? formData.documentNumber 
-                        : null,
-                    pan_number: formData.documentType === 'PAN Card' 
-                        ? formData.documentNumber 
-                        : null,
-                    land_size: parseFloat(formData.landSize),
-                    location: formData.location,
-                    gps_coordinates: formData.location.includes('GPS') ? formData.location : null,
-                    crop_history: formData.selectedCrops,
+                    land_size: formData.landSize ? parseFloat(formData.landSize) : null,
+                    location: formData.location || null,
+                    crop_history: formData.selectedCrops || [],
                 }
             );
 
@@ -136,8 +129,8 @@ const FarmerOnboarding = () => {
             await updateProfile({
                 role: 'farmer',
                 onboarding_completed: true,
-                full_name: formData.fullName,
-                land_size: parseFloat(formData.landSize),
+                full_name: formData.fullName || googleName,
+                land_size: formData.landSize ? parseFloat(formData.landSize) : null,
             });
 
             // Success - navigate to dashboard
