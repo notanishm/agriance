@@ -92,21 +92,9 @@ const FarmerOnboarding = () => {
         setError(null);
 
         try {
-            // Validate required fields
-            if (!formData.fullName || !formData.phoneNumber) {
-                throw new Error('Please fill in all required fields');
-            }
-
-            if (!formData.documentNumber) {
-                throw new Error('Please provide your document number');
-            }
-
-            if (!formData.landSize || formData.landSize <= 0) {
-                throw new Error('Please provide valid land size');
-            }
-
-            if (formData.selectedCrops.length === 0) {
-                throw new Error('Please select at least one crop');
+            // Validate required fields - only phone number is required
+            if (!formData.phoneNumber) {
+                throw new Error('Phone number is required');
             }
 
             // Get email and name from user object

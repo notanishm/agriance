@@ -55,6 +55,19 @@ const FarmerDashboard = () => {
         .filter(c => c.status === 'completed')
         .reduce((sum, c) => sum + (c.total_value || 0), 0);
     
+    // Calculate profile completion
+    const profileFields = [
+        { key: 'full_name', label: 'Full Name', value: profile?.full_name },
+        { key: 'phone_number', label: 'Phone Number', value: profile?.phone_number },
+        { key: 'aadhaar_number', label: 'Aadhaar/ID', value: profile?.aadhaar_number || profile?.pan_number },
+        { key: 'land_size', label: 'Land Size', value: profile?.land_size },
+        { key: 'location', label: 'Location', value: profile?.location },
+        { key: 'crop_history', label: 'Crops', value: profile?.crop_history?.length > 0 },
+    ];
+    const completedFields = profileFields.filter(f => f.value).length;
+    const completionPercent = Math.round((completedFields / profileFields.length) * 100);
+    const missingFields = profileFields.filter(f => !f.value).map(f => f.label);
+
     const stats = [
         { label: 'Active Contracts', value: activeContractsCount.toString(), icon: <FileCheck color="var(--primary)" /> },
         { label: 'Pending Offers', value: pendingOffersCount.toString(), icon: <Bell color="#B8860B" /> },
@@ -128,6 +141,43 @@ const FarmerDashboard = () => {
                         </motion.div>
                     ))}
                 </div>
+
+                {completionPercent < 100 && (
+                    <div className="card" style={{ 
+                        padding: '1.5rem', 
+                        marginBottom: '2rem',
+                        background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+                        border: '1px solid #fed7aa'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <div style={{ padding: '0.75rem', background: '#f97316', borderRadius: '12px', color: 'white' }}>
+                                    <AlertCircle size={24} />
+                                </div>
+                                <div>
+                                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#9a3412' }}>Complete your profile ({completionPercent}%)</h3>
+                                    <p style={{ margin: '0.25rem 0 0', color: '#c2410c', fontSize: '0.9rem' }}>
+                                        Missing: {missingFields.join(', ')}
+                                    </p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '/farmer/register'}
+                                style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: '#f97316',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: 600
+                                }}
+                            >
+                                Complete Profile
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
                     {/* Active Contracts */}

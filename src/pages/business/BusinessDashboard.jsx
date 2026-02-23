@@ -293,7 +293,7 @@ const BusinessDashboard = () => {
                                                         </span>
                                                     </div>
                                                     <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                                                        {(farmer.crops_history || []).slice(0, 3).map((crop, idx) => (
+                                                        {(farmer.crop_history || []).slice(0, 3).map((crop, idx) => (
                                                             <span key={idx} style={{ padding: '0.25rem 0.75rem', background: 'rgba(45, 90, 39, 0.05)', borderRadius: 'var(--radius-full)', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600 }}>{crop}</span>
                                                         ))}
                                                     </div>
