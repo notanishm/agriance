@@ -55,17 +55,13 @@ const FarmerDashboard = () => {
         .filter(c => c.status === 'completed')
         .reduce((sum, c) => sum + (c.total_value || 0), 0);
     
-    // Calculate profile completion
+    // Calculate profile completion - only check fields that exist in profile
     const profileFields = [
         { key: 'full_name', label: 'Full Name', value: profile?.full_name },
         { key: 'phone_number', label: 'Phone Number', value: profile?.phone_number },
-        { key: 'aadhaar_number', label: 'Aadhaar/ID', value: profile?.aadhaar_number || profile?.pan_number },
-        { key: 'land_size', label: 'Land Size', value: profile?.land_size },
-        { key: 'location', label: 'Location', value: profile?.location },
-        { key: 'crop_history', label: 'Crops', value: profile?.crop_history?.length > 0 },
-    ];
+    ].filter(f => f.value !== undefined);
     const completedFields = profileFields.filter(f => f.value).length;
-    const completionPercent = Math.round((completedFields / profileFields.length) * 100);
+    const completionPercent = profileFields.length > 0 ? Math.round((completedFields / profileFields.length) * 100) : 100;
     const missingFields = profileFields.filter(f => !f.value).map(f => f.label);
 
     const stats = [

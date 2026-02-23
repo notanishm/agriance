@@ -51,6 +51,10 @@ ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'farmer';
 ALTER TABLE profiles 
 ADD COLUMN IF NOT EXISTS gps_coordinates TEXT;
 
+-- Add land_size column for farmers
+ALTER TABLE profiles 
+ADD COLUMN IF NOT EXISTS land_size DECIMAL;
+
 -- Add location column for farmers
 ALTER TABLE profiles 
 ADD COLUMN IF NOT EXISTS location TEXT;
