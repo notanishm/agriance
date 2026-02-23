@@ -45,9 +45,17 @@ const Login = () => {
   };
 
   // Test user login
-  const handleTestLogin = () => {
+  const handleTestLogin = async () => {
     setEmail('hello@agriance.com');
     setPassword('1234');
+    setIsLoading(true);
+    const { error } = await signIn('hello@agriance.com', '1234');
+    if (!error) {
+      navigate('/roles', { replace: true });
+    } else {
+      setError(error);
+    }
+    setIsLoading(false);
   };
 
   return (

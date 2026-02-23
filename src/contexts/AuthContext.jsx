@@ -18,12 +18,20 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Check active session
+    // Check active session with timeout
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
+      clearTimeout(timeoutId);
       setUser(session?.user ?? null);
       if (session?.user) {
         loadUserProfile(session.user.id);
       }
+      setLoading(false);
+    }).catch(() => {
+      clearTimeout(timeoutId);
       setLoading(false);
     });
 
@@ -119,6 +127,7 @@ export const AuthProvider = ({ children }) => {
 
       // Test user bypass - for testing only
       if (email === 'hello@agriance.com' && password === '1234') {
+        setLoading(false);
         const testUser = {
           id: '00000000-0000-0000-0000-000000000001',
           email: 'hello@agriance.com',
