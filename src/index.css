@@ -133,8 +133,6 @@ a {
   background-color: transparent;
   color: inherit;
 }
-  flex-direction: column;
-}
 
 #root {
   width: 100%;
