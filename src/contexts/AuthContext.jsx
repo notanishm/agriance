@@ -249,6 +249,7 @@ export const AuthProvider = ({ children }) => {
         provider: 'google',
         options: {
           redirectTo: 'https://agriance.vercel.app/auth/callback',
+          scopes: 'email profile openid',
         },
       });
 
