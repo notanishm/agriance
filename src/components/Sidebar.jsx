@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate, useLocation, Link, NavLink } from 'react-router-dom';
 import {
   Sprout,
-  ShieldCheck,
   LayoutDashboard,
   FileText,
   Wallet,
@@ -18,6 +17,8 @@ import {
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/LanguageContext';
+import { farmerService } from '../services/database';
+import Logo from './Logo';
 
 const Sidebar = () => {
   const { userProfile, signOut, role } = useAuth();
@@ -94,12 +95,12 @@ const Sidebar = () => {
             background: 'var(--gold)',
             color: 'var(--forest)',
             borderRadius: '14px',
-            padding: '0.6rem',
+            padding: '0.5rem',
             display: 'flex',
             boxShadow: 'var(--shadow-main)'
           }}
         >
-          <ShieldCheck size={28} />
+          <Logo size={32} color="var(--forest)" />
         </motion.div>
         <span style={{
           fontFamily: 'var(--font-heading)',

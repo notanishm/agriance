@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, User } from 'lucide-react';
+import { User } from 'lucide-react';
+import Logo from './Logo';
 import { useTranslation } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -30,12 +31,12 @@ const Header = () => {
                         background: 'var(--forest)',
                         color: 'var(--gold)',
                         borderRadius: '12px',
-                        padding: '0.5rem',
+                        padding: '0.4rem',
                         display: 'flex',
                         boxShadow: 'var(--shadow-main)'
                     }}
                 >
-                    <ShieldCheck size={22} />
+                    <Logo size={24} color="var(--gold)" />
                 </motion.div>
                 <span style={{
                     fontFamily: 'var(--font-heading)',

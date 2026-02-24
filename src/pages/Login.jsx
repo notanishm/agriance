@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import Logo from '../components/Logo';
 
 const Login = () => {
   const { t } = useTranslation();
@@ -63,7 +64,6 @@ const Login = () => {
     }
   };
 
-<<<<<<< HEAD
   // Test user login
   const handleTestLogin = async (email) => {
     const testEmail = email || 'hello@agriance.com';
@@ -79,8 +79,6 @@ const Login = () => {
     setIsLoading(false);
   };
 
-=======
->>>>>>> c74a01f (Changes in ui)
   return (
     <div className="mobile-stack" style={{ minHeight: '100vh', display: 'flex', backgroundColor: 'var(--white)' }}>
       {/* Left Side */}
@@ -97,8 +95,8 @@ const Login = () => {
       }}>
         <div style={{ maxWidth: '480px', position: 'relative', zIndex: 10 }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit', marginBottom: '5rem' }}>
-            <div style={{ background: 'var(--forest)', color: 'var(--gold)', borderRadius: '12px', padding: '0.5rem', display: 'flex' }}>
-              <ShieldCheck size={28} />
+            <div style={{ background: 'var(--forest)', color: 'var(--gold)', borderRadius: '12px', padding: '0.4rem', display: 'flex' }}>
+              <Logo size={28} color="var(--gold)" />
             </div>
             <span style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', color: 'var(--forest)' }}>Agriance</span>
           </Link>
@@ -150,7 +148,7 @@ const Login = () => {
             {/* Mobile Logo */}
             <Link to="/" style={{ display: 'none', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit', marginBottom: '2rem' }} className="mobile-show">
               <div style={{ background: 'var(--forest)', color: 'var(--gold)', borderRadius: '8px', padding: '0.4rem', display: 'flex' }}>
-                <ShieldCheck size={20} />
+                <Logo size={20} color="var(--gold)" />
               </div>
               <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', color: 'var(--forest)' }}>Agriance</span>
             </Link>
@@ -236,7 +234,6 @@ const Login = () => {
             {t('login.google_login')}
           </button>
 
-<<<<<<< HEAD
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
             <button type="button" onClick={() => handleTestLogin('hello@agriance.com')} style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', background: 'rgba(22, 101, 52, 0.08)', color: 'var(--primary)', border: '1px dashed var(--primary)', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>
               Test 1
@@ -245,11 +242,10 @@ const Login = () => {
               Test 2
             </button>
           </div>
-=======
+
           <p style={{ textAlign: 'center', marginTop: '2.5rem', color: 'var(--olive)', fontSize: '0.9rem' }}>
             {t('login.no_account')} <Link to="/roles" style={{ color: 'var(--gold)', fontWeight: 800, textDecoration: 'none' }}>{t('login.register_link')}</Link>
           </p>
->>>>>>> c74a01f (Changes in ui)
 
           <div style={{
             marginTop: '3.5rem',

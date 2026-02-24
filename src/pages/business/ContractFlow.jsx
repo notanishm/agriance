@@ -1,8 +1,4 @@
 import React, { useState } from 'react';
-<<<<<<< HEAD
-import { motion } from 'framer-motion';
-import { FileText, Shield, CreditCard, ChevronRight, Check, Loader2, RefreshCw, AlertCircle, X } from 'lucide-react';
-=======
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     FileText,
@@ -18,9 +14,10 @@ import {
     Stamp,
     Layers,
     Activity,
-    Lock
+    Lock,
+    X
 } from 'lucide-react';
->>>>>>> c74a01f (Changes in ui)
+
 import { useTranslation } from '../../contexts/LanguageContext';
 import { generateContractLocally } from '../../services/contractEngine';
 import ContractDisplay from '../../components/ContractDisplay';
@@ -30,7 +27,7 @@ import { businessService } from '../../services/database';
 const ContractFlow = ({ farmer, onComplete, onClose }) => {
     const { user } = useAuth();
     const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
-    
+
     React.useEffect(() => {
         const checkDark = () => setIsDark(document.documentElement.classList.contains('dark'));
         checkDark();
@@ -38,7 +35,7 @@ const ContractFlow = ({ farmer, onComplete, onClose }) => {
         observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
         return () => observer.disconnect();
     }, []);
-    
+
     const [step, setStep] = useState('form'); // form, generating, review, sign, pay, done
     const [loading, setLoading] = useState(false);
     const [contractContent, setContractContent] = useState('');
@@ -127,11 +124,7 @@ const ContractFlow = ({ farmer, onComplete, onClose }) => {
             width: '100%',
             maxHeight: '90vh',
             overflowY: 'auto',
-<<<<<<< HEAD
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+            background: 'white',
             position: 'relative'
         }}>
             {onClose && (
@@ -157,15 +150,6 @@ const ContractFlow = ({ farmer, onComplete, onClose }) => {
                     <X size={20} />
                 </button>
             )}
-            {step === 'form' && (
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                        <div style={{ background: 'var(--primary-light)', p: '10px', borderRadius: '12px' }}>
-                            <FileText size={32} color="var(--primary)" />
-=======
-            background: 'white',
-            position: 'relative'
-        }}>
             {/* Architectural Progress Indicator */}
             <div style={{ marginBottom: '4rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
@@ -179,7 +163,6 @@ const ContractFlow = ({ farmer, onComplete, onClose }) => {
                             transition: 'all 0.4s ease'
                         }}>
                             {s}
->>>>>>> c74a01f (Changes in ui)
                         </div>
                     ))}
                 </div>
@@ -190,7 +173,7 @@ const ContractFlow = ({ farmer, onComplete, onClose }) => {
                         style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: 'var(--blue-trust)' }}
                     />
                 </div>
-            </div>
+            </div >
 
             <AnimatePresence mode="wait">
                 {step === 'form' && (
@@ -533,7 +516,7 @@ const ContractFlow = ({ farmer, onComplete, onClose }) => {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 };
 

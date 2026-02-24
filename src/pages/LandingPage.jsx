@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from '../contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../components/Logo';
 import {
   ShieldCheck,
   FileText,
@@ -15,16 +16,15 @@ import {
 } from 'lucide-react';
 
 const LandingPage = () => {
-  const { t } = useTranslation();
+  const { t, setLanguage } = useTranslation();
   const navigate = useNavigate();
 
-<<<<<<< HEAD
   const handleLanguageSelect = (lang) => {
     localStorage.setItem('lang', lang);
     setLanguage(lang);
     setTimeout(() => navigate('/roles'), 100);
   };
-=======
+
   const features = [
     {
       icon: <FileText size={32} />,
@@ -42,7 +42,6 @@ const LandingPage = () => {
       desc: t('landing.feature_direct_desc')
     }
   ];
->>>>>>> c74a01f (Changes in ui)
 
   return (
     <div className="agri-pattern" style={{ minHeight: '100vh', overflowX: 'hidden' }}>
@@ -135,7 +134,7 @@ const LandingPage = () => {
             </div>
             <div style={{ width: '1px', height: '20px', background: 'var(--border-light)' }} className="mobile-hide" />
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <ShieldCheck size={20} className="text-gold" />
+              <Logo size={20} color="var(--gold)" />
               <span style={{ fontWeight: 700, color: 'var(--olive)', fontSize: '0.8rem' }}>VERIFIED TRADE DATA</span>
             </div>
             <div style={{ width: '1px', height: '20px', background: 'var(--border-light)' }} className="mobile-hide" />
@@ -209,7 +208,7 @@ const LandingPage = () => {
           <div className="grid grid-cols-3 tablet-cols-1 mobile-cols-1" style={{ gap: '4rem', marginBottom: '4rem' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <ShieldCheck size={28} className="text-forest" />
+                <Logo size={28} color="var(--forest)" />
                 <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.75rem', color: 'var(--forest)' }}>Agriance</span>
               </div>
               <p style={{ color: 'var(--olive)', maxWidth: '400px', fontSize: '1rem', lineHeight: 1.6 }}>
