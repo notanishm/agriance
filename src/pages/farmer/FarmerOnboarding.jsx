@@ -2,38 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, MapPin, ClipboardList, ShieldCheck, ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react';
+import { CheckCircle2, MapPin, ClipboardList, ShieldCheck, ArrowLeft, ArrowRight, AlertCircle, Wheat, Leaf } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { farmerService } from '../../services/database';
 
 const steps = [
-    { id: 'kyc', title: 'KYC Verification', icon: <ShieldCheck /> },
-    { id: 'personal', title: 'Personal Details', icon: <CheckCircle2 /> },
-    { id: 'land', title: 'Land Details', icon: <MapPin /> },
-    { id: 'history', title: 'Crop History', icon: <ClipboardList /> }
+    { id: 'kyc', title: 'KYC Verification', icon: <ShieldCheck size={20} /> },
+    { id: 'personal', title: 'Identity Profile', icon: <CheckCircle2 size={20} /> },
+    { id: 'land', title: 'Estate Asset', icon: <MapPin size={20} /> },
+    { id: 'history', title: 'Harvest History', icon: <ClipboardList size={20} /> }
 ];
 
 const FarmerOnboarding = () => {
     const { t } = useTranslation();
     const { user, updateProfile } = useAuth();
     const navigate = useNavigate();
-    
+
     const [currentStep, setCurrentStep] = useState(0);
     const [isLocating, setIsLocating] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
-    
-    // Get Google OAuth user info
+
     const getGoogleUserInfo = () => {
-        const fullName = user?.user_metadata?.full_name || 
-                        user?.user_metadata?.name ||
-                        user?.identities?.[0]?.identity_data?.full_name ||
-                        user?.identities?.[0]?.identity_data?.name ||
-                        '';
+        const fullName = user?.user_metadata?.full_name ||
+            user?.user_metadata?.name ||
+            user?.identities?.[0]?.identity_data?.full_name ||
+            user?.identities?.[0]?.identity_data?.name ||
+            '';
         return { fullName };
     };
-    
-    // Form data state
+
     const [formData, setFormData] = useState({
         documentType: 'Aadhaar Card',
         documentNumber: '',
@@ -43,8 +41,7 @@ const FarmerOnboarding = () => {
         location: '',
         selectedCrops: []
     });
-    
-    // Pre-fill form with Google OAuth data on mount
+
     useEffect(() => {
         if (user) {
             const { fullName } = getGoogleUserInfo();
@@ -57,34 +54,27 @@ const FarmerOnboarding = () => {
         }
     }, [user]);
 
+    const getUserInfo = () => {
+        const email = user?.email ||
+            user?.user_metadata?.email ||
+            user?.user_metadata?.user_name ||
+            user?.identities?.[0]?.identity_data?.email;
+
+        const fullName = user?.user_metadata?.full_name ||
+            user?.user_metadata?.name ||
+            user?.user_metadata?.user_name ||
+            user?.identities?.[0]?.identity_data?.full_name ||
+            user?.identities?.[0]?.identity_data?.name;
+
+        return { email, fullName };
+    };
+
     const handleNext = async () => {
         if (currentStep < steps.length - 1) {
             setCurrentStep(currentStep + 1);
         } else {
-            // Final step - save to Supabase
             await handleSubmit();
         }
-    };
-
-    // Extract user info from Google OAuth or regular auth
-    const getUserInfo = () => {
-        console.log('User object:', user);
-        console.log('User metadata:', user?.user_metadata);
-        
-        // Try multiple locations for email
-        const email = user?.email || 
-                     user?.user_metadata?.email || 
-                     user?.user_metadata?.user_name ||
-                     user?.identities?.[0]?.identity_data?.email;
-        
-        // Try multiple locations for name
-        const fullName = user?.user_metadata?.full_name || 
-                        user?.user_metadata?.name ||
-                        user?.user_metadata?.user_name ||
-                        user?.identities?.[0]?.identity_data?.full_name ||
-                        user?.identities?.[0]?.identity_data?.name;
-        
-        return { email, fullName };
     };
 
     const handleSubmit = async () => {
@@ -92,23 +82,16 @@ const FarmerOnboarding = () => {
         setError(null);
 
         try {
-            // Validate required fields - only phone number is required
             if (!formData.phoneNumber) {
                 throw new Error('Phone number is required');
             }
 
-            // Get email and name from user object
             const { email: userEmail, fullName: googleName } = getUserInfo();
-            
+
             if (!userEmail) {
-                console.error('Could not find email in user object:', user);
                 throw new Error('Email not found. Please try logging in again.');
             }
 
-            console.log('Using email:', userEmail);
-            console.log('Google name:', googleName);
-
-            // Save farmer profile to Supabase
             const { data, error } = await farmerService.createFarmerProfile(
                 user.id,
                 {
@@ -121,11 +104,8 @@ const FarmerOnboarding = () => {
                 }
             );
 
-            if (error) {
-                throw new Error(error);
-            }
+            if (error) throw new Error(error);
 
-            // Update the profile in AuthContext
             await updateProfile({
                 role: 'farmer',
                 onboarding_completed: true,
@@ -133,7 +113,6 @@ const FarmerOnboarding = () => {
                 land_size: formData.landSize ? parseFloat(formData.landSize) : null,
             });
 
-            // Success - navigate to dashboard
             navigate('/farmer/dashboard');
         } catch (err) {
             console.error('Error saving farmer profile:', err);
@@ -161,7 +140,6 @@ const FarmerOnboarding = () => {
                     setIsLocating(false);
                 },
                 (error) => {
-                    console.error("Error detecting location:", error);
                     setError('Unable to detect location. Please enter manually.');
                     setIsLocating(false);
                 }
@@ -182,58 +160,72 @@ const FarmerOnboarding = () => {
     };
 
     return (
-        <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '2rem' }}>
-            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div className="agri-pattern" style={{ minHeight: '100vh', padding: '4rem 2rem' }}>
+            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
 
-                {/* Progress Stepper */}
+                {/* Header Context */}
+                <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                        <Leaf size={24} className="text-gold" />
+                        <span style={{ fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.2em', color: 'var(--olive)' }}>Ecosystem Entry</span>
+                    </div>
+                    <h1 style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>Complete Your <span className="text-gold" style={{ fontStyle: 'italic' }}>Handshake</span></h1>
+                    <p style={{ fontSize: '1.25rem', color: 'var(--olive)', maxWidth: '600px', margin: '0 auto' }}>Finalize your institutional profile to unlock collateral-free credit and direct trade.</p>
+                </div>
+
+                {/* Progress Visual */}
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    marginBottom: '3rem',
+                    marginBottom: '5rem',
                     position: 'relative',
-                    padding: '0 1rem'
+                    padding: '0 2rem'
                 }}>
                     <div style={{
                         position: 'absolute',
-                        top: '20px',
-                        left: '40px',
-                        right: '40px',
-                        height: '2px',
-                        background: '#e2e8f0',
+                        top: '25px',
+                        left: '60px',
+                        right: '60px',
+                        height: '1px',
+                        background: 'var(--border-light)',
                         zIndex: 0
                     }} />
-                    <div style={{
-                        position: 'absolute',
-                        top: '20px',
-                        left: '40px',
-                        width: `${(currentStep / (steps.length - 1)) * 90}%`,
-                        height: '2px',
-                        background: 'var(--primary)',
-                        zIndex: 0,
-                        transition: 'width 0.4s ease'
-                    }} />
+                    <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(currentStep / (steps.length - 1)) * 85}%` }}
+                        style={{
+                            position: 'absolute',
+                            top: '25px',
+                            left: '60px',
+                            height: '2px',
+                            background: 'var(--gold)',
+                            zIndex: 0
+                        }}
+                    />
 
                     {steps.map((step, index) => (
-                        <div key={step.id} style={{ zIndex: 1, textAlign: 'center' }}>
+                        <div key={step.id} style={{ zIndex: 1, textAlign: 'center', width: '120px' }}>
                             <div style={{
-                                width: '40px',
-                                height: '40px',
+                                width: '50px',
+                                height: '50px',
                                 borderRadius: '50%',
-                                background: index <= currentStep ? 'var(--primary)' : 'white',
-                                color: index <= currentStep ? 'white' : '#64748b',
+                                background: index < currentStep ? 'var(--forest)' : index === currentStep ? 'white' : 'var(--sand-light)',
+                                color: index < currentStep ? 'white' : index === currentStep ? 'var(--gold)' : 'var(--olive)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                border: index <= currentStep ? 'none' : '2px solid #e2e8f0',
-                                margin: '0 auto 0.5rem',
-                                transition: 'all 0.3s'
+                                border: index === currentStep ? '2px solid var(--gold)' : '1px solid var(--border-light)',
+                                margin: '0 auto 1rem',
+                                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                                boxShadow: index === currentStep ? 'var(--gold-glow)' : 'none'
                             }}>
-                                {index < currentStep ? <CheckCircle2 size={20} /> : step.icon}
+                                {index < currentStep ? <CheckCircle2 size={24} /> : step.icon}
                             </div>
                             <span style={{
-                                fontSize: '0.75rem',
-                                fontWeight: index <= currentStep ? '600' : '400',
-                                color: index <= currentStep ? 'var(--text-main)' : '#94a3b8'
+                                fontSize: '0.85rem',
+                                fontWeight: index <= currentStep ? 800 : 500,
+                                color: index <= currentStep ? 'var(--forest)' : 'var(--olive)',
+                                letterSpacing: '-0.01em'
                             }}>
                                 {step.title}
                             </span>
@@ -243,65 +235,57 @@ const FarmerOnboarding = () => {
 
                 <motion.div
                     key={currentStep}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="card"
-                    style={{ padding: '3rem' }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="card card-farmer"
+                    style={{ padding: '4rem', background: 'white' }}
                 >
                     {error && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            style={{
-                                padding: '1rem',
-                                background: '#fee',
-                                border: '1px solid #fcc',
-                                borderRadius: 'var(--radius-sm)',
-                                marginBottom: '1.5rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.75rem',
-                                color: '#c33'
-                            }}
-                        >
+                        <div style={{
+                            padding: '1.25rem',
+                            background: 'rgba(215, 87, 87, 0.1)',
+                            border: '1px solid var(--terracotta)',
+                            borderRadius: '12px',
+                            marginBottom: '2.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            color: 'var(--terracotta)',
+                            fontWeight: 600
+                        }}>
                             <AlertCircle size={20} />
                             <span>{error}</span>
-                        </motion.div>
+                        </div>
                     )}
 
                     {currentStep === 0 && (
-                        <div>
-                            <h2 style={{ marginBottom: '1.5rem' }}>Verify Your Identity</h2>
-                            <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
-                                Please provide your Aadhaar or PAN details to get verified.
+                        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+                            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Verify Your Identity</h2>
+                            <p style={{ color: 'var(--olive)', marginBottom: '3rem', fontSize: '1.1rem' }}>
+                                Institutional trust starts with verification. Provide your Aadhaar or PAN details.
                             </p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Document Type</label>
-                                    <select 
-                                        className="btn btn-secondary" 
-                                        style={{ width: '100%', textAlign: 'left', padding: '1rem' }}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.8rem', color: 'var(--olive)' }}>DOCUMENT TYPE</label>
+                                    <select
+                                        className="input"
+                                        style={{ width: '100%' }}
                                         value={formData.documentType}
-                                        onChange={(e) => setFormData({...formData, documentType: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, documentType: e.target.value })}
                                     >
                                         <option>Aadhaar Card</option>
                                         <option>PAN Card</option>
                                     </select>
                                 </div>
                                 <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Document Number *</label>
-                                    <input 
-                                        type="text" 
+                                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.8rem', color: 'var(--olive)' }}>SERIAL NUMBER</label>
+                                    <input
+                                        type="text"
+                                        className="input"
                                         placeholder={formData.documentType === 'Aadhaar Card' ? 'XXXX-XXXX-XXXX' : 'XXXXXXXXXX'}
                                         value={formData.documentNumber}
-                                        onChange={(e) => setFormData({...formData, documentNumber: e.target.value})}
-                                        style={{
-                                            width: '100%',
-                                            padding: '1rem',
-                                            borderRadius: 'var(--radius-sm)',
-                                            border: '1px solid var(--border)'
-                                        }} 
+                                        onChange={(e) => setFormData({ ...formData, documentNumber: e.target.value })}
                                     />
                                 </div>
                             </div>
@@ -309,27 +293,28 @@ const FarmerOnboarding = () => {
                     )}
 
                     {currentStep === 1 && (
-                        <div>
-                            <h2 style={{ marginBottom: '1.5rem' }}>Personal Information</h2>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Full Name *</label>
-                                    <input 
-                                        type="text" 
+                        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+                            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Personal Profile</h2>
+                            <p style={{ color: 'var(--olive)', marginBottom: '3rem', fontSize: '1.1rem' }}>Refine your platform identity for ecosystem participants.</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.8rem', color: 'var(--olive)' }}>FULL LEGAL NAME</label>
+                                    <input
+                                        type="text"
+                                        className="input"
                                         value={formData.fullName}
-                                        onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                                        placeholder="Enter your full name"
-                                        style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} 
+                                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                        placeholder="Enter full legal name"
                                     />
                                 </div>
-                                <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Phone Number *</label>
-                                    <input 
-                                        type="tel" 
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.8rem', color: 'var(--olive)' }}>MOBILE NUMBER</label>
+                                    <input
+                                        type="tel"
+                                        className="input"
                                         value={formData.phoneNumber}
-                                        onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
-                                        placeholder="Enter phone number"
-                                        style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} 
+                                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                                        placeholder="+91..."
                                     />
                                 </div>
                             </div>
@@ -337,30 +322,32 @@ const FarmerOnboarding = () => {
                     )}
 
                     {currentStep === 2 && (
-                        <div>
-                            <h2 style={{ marginBottom: '1.5rem' }}>Land Details</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Land Size (in Acres) *</label>
-                                    <input 
-                                        type="number" 
-                                        placeholder="Enter acres" 
+                        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+                            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Estate Assets</h2>
+                            <p style={{ color: 'var(--olive)', marginBottom: '3rem', fontSize: '1.1rem' }}>Quantify your agricultural territory for accurate risk evaluating.</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.8rem', color: 'var(--olive)' }}>TOTAL LAND SIZE (ACRES)</label>
+                                    <input
+                                        type="number"
+                                        className="input"
+                                        placeholder="e.g. 12.5"
                                         value={formData.landSize}
-                                        onChange={(e) => setFormData({...formData, landSize: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, landSize: e.target.value })}
                                         min="0"
                                         step="0.01"
-                                        style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} 
                                     />
                                 </div>
-                                <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Location (Tehsil / District)</label>
-                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.8rem', color: 'var(--olive)' }}>GEOGRAPHIC LOCATION</label>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
                                         <input
                                             type="text"
+                                            className="input"
                                             value={formData.location}
-                                            onChange={(e) => setFormData({...formData, location: e.target.value})}
-                                            placeholder="Enter location or auto-detect"
-                                            style={{ flex: 1, padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
+                                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                            placeholder="Tehsil / District"
+                                            style={{ flex: 1 }}
                                         />
                                         <button
                                             onClick={detectLocation}
@@ -368,7 +355,7 @@ const FarmerOnboarding = () => {
                                             className="btn btn-secondary"
                                             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}
                                         >
-                                            <MapPin size={18} /> {isLocating ? 'Locating...' : 'Auto-detect'}
+                                            <MapPin size={18} /> {isLocating ? 'Locating...' : 'Verify GPS'}
                                         </button>
                                     </div>
                                 </div>
@@ -378,33 +365,43 @@ const FarmerOnboarding = () => {
 
                     {currentStep === 3 && (
                         <div>
-                            <h2 style={{ marginBottom: '1.5rem' }}>Crop History</h2>
-                            <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>What crops do you usually grow? Select all that apply.</p>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-                                {['Wheat', 'Rice', 'Soybean', 'Cotton', 'Sugarcane', 'Maize', 'Onion', 'Potato', 'Others'].map(crop => (
+                            <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                                <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Harvest Capability</h2>
+                                <p style={{ color: 'var(--olive)', fontSize: '1.1rem' }}>Select your primary crop portfolio for procurement matching.</p>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1.25rem' }}>
+                                {['Wheat', 'Rice', 'Soybean', 'Cotton', 'Sugarcane', 'Maize', 'Onion', 'Potato', 'Pulse Mix'].map(crop => (
                                     <motion.div
                                         key={crop}
-                                        whileHover={{ scale: 1.02 }}
+                                        whileHover={{ y: -4 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() => toggleCrop(crop)}
                                         style={{
-                                            padding: '1.25rem 1rem',
-                                            border: `2px solid ${formData.selectedCrops.includes(crop) ? 'var(--primary)' : 'var(--border)'}`,
-                                            background: formData.selectedCrops.includes(crop) ? 'rgba(45, 90, 39, 0.05)' : 'white',
-                                            color: formData.selectedCrops.includes(crop) ? 'var(--primary)' : 'var(--text-main)',
-                                            borderRadius: 'var(--radius-md)',
+                                            padding: '2rem 1rem',
+                                            border: '1px solid var(--border-light)',
+                                            background: formData.selectedCrops.includes(crop) ? 'var(--sand-light)' : 'white',
+                                            color: formData.selectedCrops.includes(crop) ? 'var(--forest)' : 'var(--olive)',
+                                            borderRadius: '20px',
                                             textAlign: 'center',
                                             cursor: 'pointer',
-                                            fontWeight: formData.selectedCrops.includes(crop) ? 700 : 500,
-                                            transition: 'all 0.2s ease',
+                                            transition: 'all 0.3s ease',
                                             display: 'flex',
+                                            flexDirection: 'column',
                                             alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '0.5rem'
+                                            gap: '1rem',
+                                            boxShadow: formData.selectedCrops.includes(crop) ? 'inset 0 0 0 2px var(--gold)' : 'none'
                                         }}
                                     >
-                                        {crop}
-                                        {formData.selectedCrops.includes(crop) && <CheckCircle2 size={16} />}
+                                        <div style={{
+                                            width: '40px', height: '40px', borderRadius: '50%',
+                                            background: formData.selectedCrops.includes(crop) ? 'var(--forest)' : 'var(--sand-light)',
+                                            color: formData.selectedCrops.includes(crop) ? 'white' : 'var(--olive)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            {formData.selectedCrops.includes(crop) ? <CheckCircle2 size={24} /> : <Wheat size={20} />}
+                                        </div>
+                                        <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{crop}</span>
                                     </motion.div>
                                 ))}
                             </div>
@@ -412,19 +409,19 @@ const FarmerOnboarding = () => {
                     )}
 
                     <div style={{
-                        marginTop: '3rem',
+                        marginTop: '4rem',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        paddingTop: '2rem',
-                        borderTop: '1px solid var(--border)'
+                        paddingTop: '3rem',
+                        borderTop: '1px solid var(--border-light)'
                     }}>
-                        <button onClick={handleBack} className="btn btn-secondary" disabled={isSubmitting}>
-                            <ArrowLeft size={18} /> {t('common.back')}
+                        <button onClick={handleBack} className="btn btn-secondary" disabled={isSubmitting} style={{ padding: '1rem 2rem' }}>
+                            <ArrowLeft size={18} /> BACK
                         </button>
-                        <button onClick={handleNext} className="btn btn-primary" disabled={isSubmitting}>
-                            {currentStep === steps.length - 1 
-                                ? (isSubmitting ? 'Saving...' : t('common.submit'))
-                                : t('common.next')
+                        <button onClick={handleNext} className="btn btn-primary" disabled={isSubmitting} style={{ padding: '1rem 3rem' }}>
+                            {currentStep === steps.length - 1
+                                ? (isSubmitting ? 'ESTABLISHING PROFILE...' : 'COMPLETE HANDSHAKE')
+                                : 'CONTINUE'
                             } <ArrowRight size={18} />
                         </button>
                     </div>

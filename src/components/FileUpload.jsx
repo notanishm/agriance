@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, File, X, CheckCircle } from 'lucide-react';
+import { Upload, File, X, CheckCircle, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const FileUpload = ({ label, accept, onFileSelect, value }) => {
@@ -32,14 +32,16 @@ const FileUpload = ({ label, accept, onFileSelect, value }) => {
     };
 
     return (
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ marginBottom: '2rem' }}>
             {label && (
                 <label style={{
                     display: 'block',
-                    marginBottom: '0.75rem',
-                    fontWeight: 600,
-                    fontSize: '0.9rem',
-                    color: 'var(--text-main)'
+                    marginBottom: '1rem',
+                    fontWeight: 800,
+                    fontSize: '0.75rem',
+                    color: 'var(--olive)',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase'
                 }}>
                     {label}
                 </label>
@@ -52,15 +54,15 @@ const FileUpload = ({ label, accept, onFileSelect, value }) => {
                 onClick={() => fileInputRef.current?.click()}
                 style={{
                     position: 'relative',
-                    padding: '2rem',
-                    background: isDragging ? 'rgba(45, 90, 39, 0.05)' : 'rgba(0, 0, 0, 0.02)',
-                    border: `2px dashed ${isDragging ? 'var(--primary)' : 'var(--border)'}`,
-                    borderRadius: 'var(--radius-md)',
+                    padding: '3rem 2rem',
+                    background: isDragging ? 'rgba(74, 93, 35, 0.03)' : 'var(--sand-light)',
+                    border: `1px dashed ${isDragging ? 'var(--olive)' : 'var(--border-main)'}`,
+                    borderRadius: '12px',
                     textAlign: 'center',
                     cursor: 'pointer',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    transform: isDragging ? 'scale(1.02)' : 'scale(1)',
-                    overflow: 'hidden'
+                    transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                    transform: isDragging ? 'scale(1.01)' : 'scale(1)',
+                    boxShadow: isDragging ? 'var(--glow-sm)' : 'none'
                 }}
             >
                 <input
@@ -75,40 +77,42 @@ const FileUpload = ({ label, accept, onFileSelect, value }) => {
                     {value ? (
                         <motion.div
                             key="file-info"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'white', padding: '1.5rem', borderRadius: '10px', border: '1px solid var(--border-light)', textAlign: 'left' }}
                         >
                             <div style={{
-                                padding: '0.75rem',
-                                background: 'rgba(45, 90, 39, 0.1)',
-                                borderRadius: '12px',
-                                color: 'var(--primary)'
+                                width: '48px', height: '48px',
+                                background: 'rgba(74, 93, 35, 0.1)',
+                                borderRadius: '10px',
+                                color: 'var(--olive)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
                             }}>
-                                <File size={24} />
+                                <File size={22} />
                             </div>
-                            <div style={{ textAlign: 'left', flex: 1 }}>
-                                <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-main)' }}>
-                                    {value.name || 'File Uploaded'}
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--blue-trust)', marginBottom: '0.25rem' }}>
+                                    {value.name || 'Document Uploaded'}
                                 </div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                    Ready for submission
+                                <div style={{ fontSize: '0.8rem', color: 'var(--olive)', fontWeight: 600, opacity: 0.7, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Shield size={12} /> SECURELY ATTACHED
                                 </div>
                             </div>
                             <button
                                 onClick={clearFile}
                                 style={{
-                                    background: 'rgba(0, 0, 0, 0.05)',
+                                    background: 'var(--sand-light)',
                                     border: 'none',
-                                    borderRadius: '50%',
+                                    borderRadius: '8px',
                                     width: '32px',
                                     height: '32px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     cursor: 'pointer',
-                                    color: 'var(--text-muted)'
+                                    color: 'var(--terracotta)',
+                                    transition: 'background 0.2s'
                                 }}
                             >
                                 <X size={16} />
@@ -122,38 +126,46 @@ const FileUpload = ({ label, accept, onFileSelect, value }) => {
                             exit={{ opacity: 0 }}
                         >
                             <div style={{
-                                width: '48px',
-                                height: '48px',
+                                width: '56px',
+                                height: '56px',
                                 background: 'white',
-                                borderRadius: '50%',
+                                borderRadius: '12px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                margin: '0 auto 1rem',
-                                boxShadow: 'var(--shadow-sm)',
-                                color: 'var(--primary)'
+                                margin: '0 auto 1.5rem',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                                color: 'var(--olive)'
                             }}>
-                                <Upload size={20} />
+                                <Upload size={24} />
                             </div>
-                            <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
-                                Click or drag file to upload
+                            <div style={{ fontWeight: 700, color: 'var(--blue-trust)', marginBottom: '0.5rem', fontSize: '1rem' }}>
+                                Deploy Institutional Document
                             </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                {accept ? `Accepted: ${accept}` : 'PDF, JPG, PNG up to 10MB'}
+                            <div style={{ fontSize: '0.85rem', color: 'var(--olive)', fontWeight: 500, opacity: 0.6 }}>
+                                {accept ? `ACCEPTED FORMATS: ${accept.toUpperCase()}` : 'PDF, JPG, PNG SECURE TRANSFER'}
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
                 {value && (
-                    <div style={{
-                        position: 'absolute',
-                        top: '1rem',
-                        right: '1rem',
-                        color: 'var(--success)'
-                    }}>
-                        <CheckCircle size={18} />
-                    </div>
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        style={{
+                            position: 'absolute',
+                            top: '-10px',
+                            right: '-10px',
+                            background: 'white',
+                            borderRadius: '50%',
+                            padding: '4px',
+                            boxShadow: 'var(--glow-sm)',
+                            color: 'var(--olive)'
+                        }}
+                    >
+                        <CheckCircle size={24} fill="currentColor" color="white" />
+                    </motion.div>
                 )}
             </div>
         </div>

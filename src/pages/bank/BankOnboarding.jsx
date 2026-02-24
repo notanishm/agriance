@@ -1,38 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Landmark, ShieldCheck, FileText, Globe, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Landmark, ShieldCheck, FileText, Globe, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, Activity, Lock } from 'lucide-react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { bankService } from '../../services/database';
 
 const steps = [
-    { id: 'bank_info', title: 'Institution Info', icon: <Landmark /> },
-    { id: 'license', title: 'License Verification', icon: <ShieldCheck /> },
-    { id: 'products', title: 'Loan Products', icon: <FileText /> },
-    { id: 'ops', title: 'Operational Setup', icon: <Globe /> }
+    { id: 'bank_info', title: 'Institute Profile', icon: <Landmark size={20} /> },
+    { id: 'license', title: 'Regulatory Compliance', icon: <ShieldCheck size={20} /> },
+    { id: 'products', title: 'Loan Product Architecture', icon: <FileText size={20} /> },
+    { id: 'ops', title: 'Deployment Node', icon: <Globe size={20} /> }
 ];
 
 const BankOnboarding = () => {
     const { t } = useTranslation();
     const { user, updateProfile } = useAuth();
     const navigate = useNavigate();
-    
+
     const [currentStep, setCurrentStep] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
-    
-    // Get Google OAuth user info
+
     const getGoogleUserInfo = () => {
-        const fullName = user?.user_metadata?.full_name || 
-                        user?.user_metadata?.name ||
-                        user?.identities?.[0]?.identity_data?.full_name ||
-                        user?.identities?.[0]?.identity_data?.name ||
-                        '';
+        const fullName = user?.user_metadata?.full_name ||
+            user?.user_metadata?.name ||
+            user?.identities?.[0]?.identity_data?.full_name ||
+            user?.identities?.[0]?.identity_data?.name ||
+            '';
         return { fullName };
     };
-    
-    // Form data state
+
     const [formData, setFormData] = useState({
         bankName: '',
         institutionType: 'Public Sector Bank',
@@ -42,8 +40,7 @@ const BankOnboarding = () => {
         branchName: '',
         bankCode: ''
     });
-    
-    // Pre-fill form with Google OAuth data on mount
+
     useEffect(() => {
         if (user) {
             const { fullName } = getGoogleUserInfo();
@@ -64,46 +61,36 @@ const BankOnboarding = () => {
         }
     };
 
+    const getUserInfo = () => {
+        const email = user?.email ||
+            user?.user_metadata?.email ||
+            user?.user_metadata?.user_name ||
+            user?.identities?.[0]?.identity_data?.email;
+
+        const fullName = user?.user_metadata?.full_name ||
+            user?.user_metadata?.name ||
+            user?.user_metadata?.user_name ||
+            user?.identities?.[0]?.identity_data?.full_name ||
+            user?.identities?.[0]?.identity_data?.name;
+
+        return { email, fullName };
+    };
+
     const handleSubmit = async () => {
         setIsSubmitting(true);
         setError(null);
 
-    // Extract user info from Google OAuth or regular auth
-    const getUserInfo = () => {
-        console.log('User object:', user);
-        console.log('User metadata:', user?.user_metadata);
-        
-        const email = user?.email || 
-                     user?.user_metadata?.email || 
-                     user?.user_metadata?.user_name ||
-                     user?.identities?.[0]?.identity_data?.email;
-        
-        const fullName = user?.user_metadata?.full_name || 
-                        user?.user_metadata?.name ||
-                        user?.user_metadata?.user_name ||
-                        user?.identities?.[0]?.identity_data?.full_name ||
-                        user?.identities?.[0]?.identity_data?.name;
-        
-        return { email, fullName };
-    };
-
         try {
-            // Validate required fields
             if (!formData.bankName || !formData.rbiLicense) {
                 throw new Error('Please fill in bank name and RBI license number');
             }
 
-            // Get email from user object
-            const { email: userEmail, fullName: googleName } = getUserInfo();
-            
+            const { email: userEmail } = getUserInfo();
+
             if (!userEmail) {
-                console.error('Could not find email in user object:', user);
                 throw new Error('Email not found. Please try logging in again.');
             }
 
-            console.log('Using email:', userEmail);
-
-            // Save bank profile to Supabase
             const { data, error } = await bankService.createBankProfile(
                 user.id,
                 {
@@ -115,18 +102,14 @@ const BankOnboarding = () => {
                 }
             );
 
-            if (error) {
-                throw new Error(error);
-            }
+            if (error) throw new Error(error);
 
-            // Update the profile in AuthContext
             await updateProfile({
                 role: 'bank',
                 onboarding_completed: true,
                 bank_name: formData.bankName,
             });
 
-            // Success - navigate to dashboard
             navigate('/bank/dashboard');
         } catch (err) {
             console.error('Error saving bank profile:', err);
@@ -144,163 +127,253 @@ const BankOnboarding = () => {
     };
 
     return (
-        <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '2rem' }}>
-            <div style={{ maxWidth: '800px', margin: '4rem auto' }}>
+        <div className="agri-pattern" style={{ minHeight: '100vh', padding: '4rem 2rem' }}>
+            <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
 
-                {/* Progress Stepper */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: '4rem',
-                    position: 'relative'
-                }}>
-                    <div style={{
-                        position: 'absolute', top: '22px', left: '40px', right: '40px',
-                        height: '2px', background: '#e2e8f0', zIndex: 0
-                    }} />
-                    <div style={{
-                        position: 'absolute', top: '22px', left: '40px',
-                        width: `${(currentStep / (steps.length - 1)) * 90}%`,
-                        height: '2px', background: 'var(--primary)', zIndex: 0,
-                        transition: 'all 0.4s'
-                    }} />
-
-                    {steps.map((step, index) => (
-                        <div key={step.id} style={{ zIndex: 1, textAlign: 'center' }}>
-                            <div style={{
-                                width: '45px', height: '45px', borderRadius: '50%',
-                                background: index <= currentStep ? 'var(--primary)' : 'white',
-                                color: index <= currentStep ? 'white' : '#94a3b8',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                border: index <= currentStep ? 'none' : '2px solid #e2e8f0',
-                                margin: '0 auto 0.75rem', transition: 'all 0.3s'
-                            }}>
-                                {index < currentStep ? <CheckCircle2 size={24} /> : step.icon}
-                            </div>
-                            <span style={{
-                                fontSize: '0.8rem', fontWeight: 600,
-                                color: index <= currentStep ? 'var(--text-main)' : '#94a3b8'
-                            }}>
-                                {step.title}
-                            </span>
-                        </div>
-                    ))}
+                {/* Header Context */}
+                <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <Lock size={18} className="text-gold" />
+                        <span style={{ fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.3em', color: 'var(--blue-trust)' }}>SECURE INSTITUTIONAL PORTAL</span>
+                    </div>
+                    <h1 style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>Capital <span className="text-gold" style={{ fontStyle: 'italic' }}>Precision</span></h1>
+                    <p style={{ fontSize: '1.25rem', color: 'var(--olive)', maxWidth: '600px', margin: '0 auto' }}>Establishing your institutional framework for the agricultural ecosystem.</p>
                 </div>
 
-                <motion.div
-                    key={currentStep}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="card"
-                    style={{ padding: '4rem' }}
-                >
-                    {currentStep === 0 && (
-                        <div>
-                            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Institution Registration</h2>
-                            <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>Provide the official details of your banking or financial institution.</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '4rem', alignItems: 'start' }}>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                                <div className="input-group" style={{ gridColumn: 'span 2' }}>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Legal Bank Name</label>
-                                    <input type="text" placeholder="e.g. State Bank of India" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
+                    {/* Stepper Sidebar */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {steps.map((step, index) => (
+                            <div key={step.id} style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1.25rem',
+                                color: currentStep === index ? 'var(--blue-trust)' : 'var(--olive)',
+                                opacity: currentStep >= index ? 1 : 0.4,
+                                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+                            }}>
+                                <div style={{
+                                    width: '40px', height: '40px', borderRadius: '10px',
+                                    background: currentStep === index ? 'var(--blue-trust)' : 'var(--sand-light)',
+                                    color: currentStep === index ? 'white' : 'inherit',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    border: currentStep === index ? 'none' : '1px solid var(--border-light)',
+                                    boxShadow: currentStep === index ? 'var(--glow-sm)' : 'none'
+                                }}>
+                                    {currentStep > index ? <CheckCircle2 size={20} /> : step.icon}
                                 </div>
-                                <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Institution Type</label>
-                                    <select style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-                                        <option>Public Sector Bank</option>
-                                        <option>Private Bank</option>
-                                        <option>Co-operative Bank</option>
-                                        <option>NBFC</option>
-                                        <option>MFI</option>
-                                    </select>
-                                </div>
-                                <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Headquarters City</label>
-                                    <input type="text" placeholder="Mumbai" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.1em', opacity: 0.6 }}>STEP 0{index + 1}</span>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: 700 }}>{step.title}</span>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
 
-                    {currentStep === 1 && (
-                        <div>
-                            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Regulatory Compliance</h2>
-                            <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>We verify your RBI license and GST registration to ensure platform security.</p>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>RBI License Number</label>
-                                    <input type="text" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
-                                </div>
-                                <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>GSTIN</label>
-                                    <input type="text" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
-                                </div>
-                                <div style={{ padding: '2rem', border: '2px dashed var(--border)', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
-                                    <p style={{ color: 'var(--text-muted)', margin: 0 }}>Drag & Drop official RBI Authorization PDF</p>
-                                </div>
+                    {/* Content Area */}
+                    <motion.div
+                        key={currentStep}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="card"
+                        style={{ padding: '4rem', background: 'white', borderRadius: '12px', border: '1px solid var(--border-light)' }}
+                    >
+                        {error && (
+                            <div style={{
+                                padding: '1.25rem',
+                                background: 'rgba(215, 87, 87, 0.05)',
+                                border: '1px solid var(--terracotta)',
+                                borderRadius: '8px',
+                                marginBottom: '2.5rem',
+                                display: 'flex',
+                                alignItems: 'center', gap: '1rem',
+                                color: 'var(--terracotta)',
+                                fontSize: '0.9rem',
+                                fontWeight: 600
+                            }}>
+                                <AlertCircle size={18} />
+                                <span>{error}</span>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {currentStep === 2 && (
-                        <div>
-                            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Loan Product Catalog</h2>
-                            <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>Define the agricultural loan products you want to offer on FarmConnect.</p>
+                        <AnimatePresence mode="wait">
+                            {currentStep === 0 && (
+                                <motion.div key="step0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                    <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Institute Profile</h2>
+                                    <p style={{ color: 'var(--olive)', marginBottom: '3rem', fontSize: '1.1rem' }}>Official identity metrics for institutional onboarding.</p>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                {['Kisan Credit Card (KCC) Loan', 'Crop Production Loan', 'Farm Mechanization Loan', 'Irrigation Infrastructure Loan'].map((prod, i) => (
-                                    <div key={i} style={{
-                                        padding: '1.25rem', border: '1px solid var(--border)',
-                                        borderRadius: 'var(--radius-sm)', display: 'flex',
-                                        justifyContent: 'space-between', alignItems: 'center'
-                                    }}>
-                                        <span style={{ fontWeight: 600 }}>{prod}</span>
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
-                                            <input type="text" placeholder="Interest Rate %" style={{ width: '120px', padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '4px' }} />
-                                            <button className="btn btn-secondary" style={{ padding: '0.5rem 1rem' }}>Edit Terms</button>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.75rem', color: 'var(--blue-trust)' }}>LEGAL ENTITY NAME</label>
+                                            <input
+                                                type="text"
+                                                className="input"
+                                                placeholder="e.g. State Bank of India"
+                                                value={formData.bankName}
+                                                onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.75rem', color: 'var(--blue-trust)' }}>INSTITUTION TYPE</label>
+                                                <select
+                                                    className="input"
+                                                    value={formData.institutionType}
+                                                    onChange={(e) => setFormData({ ...formData, institutionType: e.target.value })}
+                                                >
+                                                    <option>Public Sector Bank</option>
+                                                    <option>Private Bank</option>
+                                                    <option>Co-operative Bank</option>
+                                                    <option>NBFC</option>
+                                                    <option>MFI</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.75rem', color: 'var(--blue-trust)' }}>HEADQUARTERS</label>
+                                                <input
+                                                    type="text"
+                                                    className="input"
+                                                    placeholder="Mumbai / Delhi"
+                                                    value={formData.headquartersCity}
+                                                    onChange={(e) => setFormData({ ...formData, headquartersCity: e.target.value })}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                ))}
-                                <button className="btn btn-secondary" style={{ borderStyle: 'dashed' }}>+ Add Custom Product</button>
-                            </div>
-                        </div>
-                    )}
+                                </motion.div>
+                            )}
 
-                    {currentStep === 3 && (
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{
-                                width: '100px', height: '100px', background: 'rgba(16, 185, 129, 0.1)',
-                                color: 'var(--success)', borderRadius: '50%', display: 'flex',
-                                alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem'
-                            }}>
-                                <CheckCircle2 size={50} />
-                            </div>
-                            <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Ready to Launch</h2>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '3rem' }}>
-                                Your institution is now registered. You can start evaluating loan applications from farmers and businesses immediately.
-                            </p>
-                            <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'left', marginBottom: '1rem' }}>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>Verification Status</div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#F59E0B' }}>
-                                    <ShieldCheck size={18} /> <span>Application pending final admin approval (usually 2-4 hours)</span>
+                            {currentStep === 1 && (
+                                <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                    <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Regulatory Audit</h2>
+                                    <p style={{ color: 'var(--olive)', marginBottom: '3rem', fontSize: '1.1rem' }}>Sovereign authorization and tax identification mapping.</p>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.75rem', color: 'var(--blue-trust)' }}>RBI LICENSE NUMBER</label>
+                                            <input
+                                                type="text"
+                                                className="input"
+                                                placeholder="AUTH-XXXX-XXXX"
+                                                value={formData.rbiLicense}
+                                                onChange={(e) => setFormData({ ...formData, rbiLicense: e.target.value })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.75rem', color: 'var(--blue-trust)' }}>INSTITUTIONAL GSTIN</label>
+                                            <input
+                                                type="text"
+                                                className="input"
+                                                placeholder="22AAAAA0000A1Z5"
+                                                value={formData.gstin}
+                                                onChange={(e) => setFormData({ ...formData, gstin: e.target.value })}
+                                            />
+                                        </div>
+                                        <div style={{
+                                            padding: '3rem',
+                                            border: '1px dashed var(--blue-trust)',
+                                            background: 'var(--sand-light)',
+                                            borderRadius: '8px',
+                                            textAlign: 'center'
+                                        }}>
+                                            <FileText size={32} className="text-blue-trust" style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                                            <p style={{ color: 'var(--blue-trust)', fontSize: '0.85rem', fontWeight: 700 }}>UPLOAD RBI AUTHORIZATION PDF</p>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {currentStep === 2 && (
+                                <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                    <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Product Engineering</h2>
+                                    <p style={{ color: 'var(--olive)', marginBottom: '3rem', fontSize: '1.1rem' }}>Defining institutional lending frameworks and interest archetypes.</p>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                        {['Kisan Credit Card (KCC)', 'Post-Harvest Finance', 'Agri-Infra Debt', 'Micro-Irrigation Lease'].map((prod, i) => (
+                                            <div key={i} style={{
+                                                padding: '1.5rem',
+                                                border: '1px solid var(--border-light)',
+                                                borderRadius: '8px',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                background: 'var(--white)'
+                                            }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                    <Activity size={18} className="text-gold" />
+                                                    <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{prod.toUpperCase()}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                    <input type="text" placeholder="Rate %" style={{ width: '80px', padding: '0.5rem', border: '1px solid var(--border-light)', borderRadius: '4px', fontSize: '0.8rem' }} />
+                                                    <button className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.7rem', fontWeight: 800 }}>CONFIGURE</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <button className="btn btn-secondary" style={{ borderStyle: 'dashed', border: '1px dashed var(--border-light)', background: 'transparent', padding: '1.5rem', fontWeight: 800, fontSize: '0.8rem', color: 'var(--olive)' }}>+ ENGINEER CUSTOM PRODUCT ARCHIVE</button>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {currentStep === 3 && (
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{
+                                        width: '80px', height: '80px', background: 'var(--blue-trust)',
+                                        color: 'white', borderRadius: '50%', display: 'flex',
+                                        alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem',
+                                        boxShadow: 'var(--glow-sm)'
+                                    }}>
+                                        <CheckCircle2 size={40} />
+                                    </div>
+                                    <h2 style={{ fontSize: '3rem', marginBottom: '1rem' }}>System Ready</h2>
+                                    <p style={{ color: 'var(--olive)', fontSize: '1.15rem', marginBottom: '3.5rem' }}>
+                                        Your institutional node is now active. Authorization for credit deployment is established.
+                                    </p>
+                                    <div style={{ background: 'var(--sand-light)', padding: '2rem', borderRadius: '12px', textAlign: 'left', border: '1px solid var(--border-light)' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--blue-trust)', letterSpacing: '0.1em', marginBottom: '1rem' }}>OPERATIONAL STATUS</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--gold)' }}>
+                                            <Activity size={18} />
+                                            <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Pending final cryptographic verification (Est. 2-4 hrs)</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    )}
+                            )}
+                        </AnimatePresence>
 
-                    <div style={{
-                        marginTop: '4rem', display: 'flex', justifyContent: 'space-between',
-                        paddingTop: '2rem', borderTop: '1px solid var(--border)'
-                    }}>
-                        <button onClick={handleBack} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <ArrowLeft size={18} /> {t('common.back')}
-                        </button>
-                        <button onClick={handleNext} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {currentStep === steps.length - 1 ? 'Go to Dashboard' : t('common.next')} <ArrowRight size={18} />
-                        </button>
-                    </div>
-                </motion.div>
+                        <div style={{
+                            marginTop: '5rem', display: 'flex', justifyContent: 'space-between',
+                            paddingTop: '3rem', borderTop: '1px solid var(--border-light)'
+                        }}>
+                            <button
+                                onClick={handleBack}
+                                className="btn btn-secondary"
+                                style={{
+                                    opacity: currentStep === 0 ? 0 : 1,
+                                    pointerEvents: currentStep === 0 ? 'none' : 'auto',
+                                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                    fontWeight: 800, fontSize: '0.85rem'
+                                }}
+                            >
+                                <ArrowLeft size={18} /> BACK
+                            </button>
+                            <button
+                                onClick={handleNext}
+                                className="btn btn-primary"
+                                disabled={isSubmitting}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                    fontWeight: 800, fontSize: '0.85rem',
+                                    background: 'var(--blue-trust)', color: 'white'
+                                }}
+                            >
+                                {currentStep === steps.length - 1
+                                    ? (isSubmitting ? 'ESTABLISHING NODE...' : 'INITIALIZE DASHBOARD')
+                                    : 'NEXT PROTOCOL'
+                                } <ArrowRight size={18} />
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
             </div>
         </div>
     );

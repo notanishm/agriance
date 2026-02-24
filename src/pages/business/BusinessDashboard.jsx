@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus, Search, MapPin, Star, Filter,
     ArrowRight, CheckCircle, Globe, Banknote,
-    ShieldCheck, ChevronDown, Landmark, Briefcase, Microscope, ThermometerSun, AlertCircle, User
+    ShieldCheck, ChevronDown, Landmark, Briefcase, Microscope, ThermometerSun, AlertCircle, User,
+    X, LayoutDashboard, Database, Activity
 } from 'lucide-react';
 import ContractFlow from './ContractFlow';
 import LoanApplicationFlow from '../../components/LoanApplicationFlow';
@@ -20,8 +21,7 @@ const BusinessDashboard = () => {
     const [showContract, setShowContract] = useState(false);
     const [showLoanFlow, setShowLoanFlow] = useState(false);
     const [activeTab, setActiveTab] = useState('marketplace'); // marketplace, financing, quality
-    
-    // Real data from Supabase
+
     const [farmers, setFarmers] = useState([]);
     const [contracts, setContracts] = useState([]);
     const [profile, setProfile] = useState(null);
@@ -34,53 +34,24 @@ const BusinessDashboard = () => {
                 setLoading(false);
                 return;
             }
-            
+
             try {
                 setLoading(true);
                 setError(null);
 
-                // Debug: log businessService keys
-                console.log('businessService keys:', Object.keys(businessService || {}));
-                console.log('searchFarmers type:', typeof businessService?.searchFarmers);
-
-                // Fetch available farmers (for marketplace) - with defensive check
                 if (typeof businessService?.searchFarmers === 'function') {
                     const { data: farmersData, error: farmersError } = await businessService.searchFarmers('');
-                    if (farmersError) {
-                        console.error('Farmers fetch error:', farmersError);
-                        setFarmers([]);
-                    } else {
-                        setFarmers(farmersData || []);
-                    }
-                } else {
-                    console.error('searchFarmers missing on businessService', businessService);
-                    setFarmers([]);
+                    if (!farmersError) setFarmers(farmersData || []);
                 }
 
-                // Fetch business contracts
                 if (typeof businessService?.getBusinessContracts === 'function') {
                     const { data: contractsData, error: contractsError } = await businessService.getBusinessContracts(user.id);
-                    if (contractsError) {
-                        console.error('Contracts fetch error:', contractsError);
-                        setContracts([]);
-                    } else {
-                        setContracts(contractsData || []);
-                    }
-                } else {
-                    setContracts([]);
+                    if (!contractsError) setContracts(contractsData || []);
                 }
 
-                // Fetch business profile
                 if (typeof businessService?.getBusinessProfile === 'function') {
                     const { data: profileData, error: profileError } = await businessService.getBusinessProfile(user.id);
-                    if (profileError) {
-                        console.error('Profile fetch error:', profileError);
-                        setProfile(null);
-                    } else {
-                        setProfile(profileData);
-                    }
-                } else {
-                    setProfile(null);
+                    if (!profileError) setProfile(profileData);
                 }
 
             } catch (err) {
@@ -91,17 +62,9 @@ const BusinessDashboard = () => {
             }
         };
 
-        // Add timeout to prevent infinite loading
-        const timeoutId = setTimeout(() => {
-            setLoading(false);
-        }, 10000); // 10 second timeout
-
         fetchData();
-
-        return () => clearTimeout(timeoutId);
     }, [user]);
 
-    // Calculate stats from real data
     const activeContractsCount = contracts.filter(c => c.status === 'active' || c.status === 'in_progress').length;
     const totalContractValue = contracts.reduce((sum, c) => sum + (c.total_value || 0), 0);
     const trustScore = profile?.trust_score || 84;
@@ -114,197 +77,187 @@ const BusinessDashboard = () => {
 
     if (loading) {
         return (
-            <div style={{ minHeight: '100vh', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
-                    <p style={{ color: 'var(--text-muted)' }}>Loading your dashboard...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div style={{ minHeight: '100vh', background: 'var(--bg-main)', padding: '3rem 4rem' }}>
-                <div className="card" style={{ padding: '2rem', maxWidth: '600px', margin: '2rem auto', border: '1px solid #ef4444', background: 'var(--bg-card)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', marginBottom: '1rem' }}>
-                        <AlertCircle size={24} />
-                        <h3 style={{ margin: 0, color: 'var(--text-main)' }}>Error Loading Dashboard</h3>
-                    </div>
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{error}</p>
-                    <button className="btn btn-primary" onClick={() => window.location.reload()}>Retry</button>
-                </div>
+            <div className="agri-pattern" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    style={{ color: 'var(--olive)' }}
+                >
+                    <Briefcase size={48} />
+                </motion.div>
             </div>
         );
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
-            {/* Tab Navigation */}
-            <div style={{ background: 'white', borderBottom: '1px solid var(--border)', padding: '0 4rem' }}>
-                <div style={{ display: 'flex', gap: '2rem' }}>
-                    <button
-                        onClick={() => setActiveTab('marketplace')}
-                        style={{
-                            padding: '1.5rem 0.5rem',
-                            border: 'none',
-                            background: 'none',
-                            color: activeTab === 'marketplace' ? 'var(--primary)' : 'var(--text-muted)',
-                            fontWeight: 700,
-                            borderBottom: activeTab === 'marketplace' ? '3px solid var(--primary)' : '3px solid transparent',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}
-                    >
-                        <Briefcase size={18} /> Farmer Marketplace
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('financing')}
-                        style={{
-                            padding: '1.5rem 0.5rem',
-                            border: 'none',
-                            background: 'none',
-                            color: activeTab === 'financing' ? 'var(--primary)' : 'var(--text-muted)',
-                            fontWeight: 700,
-                            borderBottom: activeTab === 'financing' ? '3px solid var(--primary)' : '3px solid transparent',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}
-                    >
-                        <Landmark size={18} /> Business Financing
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('quality')}
-                        style={{
-                            padding: '1.5rem 0.5rem',
-                            border: 'none',
-                            background: 'none',
-                            color: activeTab === 'quality' ? 'var(--primary)' : 'var(--text-muted)',
-                            fontWeight: 700,
-                            borderBottom: activeTab === 'quality' ? '3px solid var(--primary)' : '3px solid transparent',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}
-                    >
-                        <ShieldCheck size={18} /> {t('quality.title')}
-                    </button>
-                </div>
-            </div>
-
-            <main style={{ padding: '3rem 4rem' }}>
-                {activeTab === 'marketplace' && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
-                            <div>
-                                <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Marketplace</h1>
-                                <p style={{ color: 'var(--text-muted)' }}>Browse verified farmers and establish direct trade contracts.</p>
-                            </div>
-                            <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ padding: '1rem 2rem', borderRadius: 'var(--radius-md)' }}>
-                                <Plus size={20} /> Post New Requirement
-                            </button>
+        <div className="canvas">
+            <header style={{ marginBottom: '3rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                            <LayoutDashboard size={20} className="text-olive" />
+                            <span style={{ fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.1em', color: 'var(--olive)' }}>PROCUREMENT OPS</span>
                         </div>
+                        <h1 style={{ marginBottom: '0.5rem' }}>{profile?.business_name || 'Agri-Business'} Dashboard</h1>
+                        <p style={{ fontSize: '1.25rem', color: 'var(--olive)' }}>Institutional grade monitoring and procurement.</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <div style={{
+                            padding: '0.75rem 1.25rem', background: 'white',
+                            border: '1px solid var(--border-light)', borderRadius: 'var(--radius-business)',
+                            display: 'flex', alignItems: 'center', gap: '1rem'
+                        }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--olive)', fontWeight: 700 }}>TRUST SCORE</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--forest)' }}>{trustScore}</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '3rem' }}>
-                            {/* Filters Sidebar */}
+            {/* Navigation Tabs */}
+            <nav style={{
+                display: 'flex', gap: '1rem', marginBottom: '3rem',
+                background: 'var(--sand-light)', padding: '0.5rem',
+                borderRadius: '16px', border: '1px solid var(--border-light)',
+                maxWidth: 'fit-content'
+            }}>
+                {[
+                    { id: 'marketplace', label: 'Farmer Marketplace', icon: <Briefcase size={18} /> },
+                    { id: 'financing', label: 'Strategic Financing', icon: <Landmark size={18} /> },
+                    { id: 'quality', label: 'Ecosystem Quality', icon: <Activity size={18} /> }
+                ].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        style={{
+                            padding: '0.8rem 1.5rem',
+                            border: 'none',
+                            background: activeTab === tab.id ? 'white' : 'transparent',
+                            color: activeTab === tab.id ? 'var(--forest)' : 'var(--olive)',
+                            fontWeight: 700,
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            boxShadow: activeTab === tab.id ? 'var(--shadow-sm)' : 'none',
+                            transition: 'all 0.2s ease'
+                        }}
+                    >
+                        {tab.icon} {tab.label}
+                    </button>
+                ))}
+            </nav>
+
+            <main>
+                {activeTab === 'marketplace' && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '3rem' }}>
+                            {/* Filtering Sidebar */}
                             <aside>
-                                <div className="card" style={{ padding: '1.5rem' }}>
-                                    <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <Filter size={18} /> Filters
-                                    </h3>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div className="card card-business" style={{ padding: '2rem', sticky: 'top', top: '2rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+                                        <Filter size={18} className="text-olive" />
+                                        <h3 style={{ fontSize: '1.25rem', margin: 0 }}>Strategy Filters</h3>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                         <div>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>Crop Category</label>
-                                            <select style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-                                                <option>All Categories</option>
-                                                {cropCategories.map(cat => (
-                                                    <option key={cat.name} value={cat.name}>{cat.name}</option>
-                                                ))}
+                                            <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--olive)' }}>COMMODITY</label>
+                                            <select className="input" style={{ width: '100%', padding: '0.8rem' }}>
+                                                <option>All Commodities</option>
+                                                {cropCategories.map(cat => <option key={cat.name}>{cat.name}</option>)}
                                             </select>
                                         </div>
                                         <div>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>Specific Crop</label>
-                                            <select style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-                                                <option>All Crops</option>
-                                                {cropCategories.map(cat => (
-                                                    <optgroup key={cat.name} label={cat.name}>
-                                                        {cat.crops.map(crop => (
-                                                            <option key={crop} value={crop}>{crop}</option>
-                                                        ))}
-                                                    </optgroup>
-                                                ))}
-                                            </select>
+                                            <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--olive)' }}>SOCIETAL LAND SIZE</label>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                                                <button style={{ padding: '0.5rem', background: 'white', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.8rem' }}>&lt; 5 Acres</button>
+                                                <button style={{ padding: '0.5rem', background: 'white', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.8rem' }}>5-20 Acres</button>
+                                            </div>
                                         </div>
+
+                                        <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ marginTop: '1rem', width: '100%' }}>
+                                            <Plus size={18} /> New Request
+                                        </button>
                                     </div>
                                 </div>
                             </aside>
 
-                            {/* Main Content: Farmer List */}
+                            {/* Farmer List */}
                             <section>
-                                <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem' }}>
-                                    <div style={{ position: 'relative', flex: 1 }}>
-                                        <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={20} />
-                                        <input type="text" placeholder="Search farmers by name, location, or crop..." style={{
+                                <div style={{ position: 'relative', marginBottom: '2.5rem' }}>
+                                    <Search style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--olive)' }} size={20} />
+                                    <input
+                                        type="text"
+                                        placeholder="Intelligence Search: Name, Location, or Specific Crop Capability..."
+                                        style={{
                                             width: '100%',
-                                            padding: '1rem 1rem 1rem 3rem',
-                                            borderRadius: 'var(--radius-md)',
-                                            border: '1px solid var(--border)',
+                                            padding: '1.25rem 1.25rem 1.25rem 3.5rem',
+                                            borderRadius: 'var(--radius-business)',
+                                            border: '1px solid var(--border-light)',
+                                            background: 'white',
+                                            fontSize: '1.1rem',
                                             boxShadow: 'var(--shadow-sm)'
-                                        }} />
-                                    </div>
+                                        }}
+                                    />
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    {farmers.length === 0 ? (
-                                        <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
-                                            <User size={48} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
-                                            <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>No Farmers Available</h3>
-                                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                Check back later for verified farmers in your region
-                                            </p>
-                                        </div>
-                                    ) : (
-                                        farmers.map(farmer => (
-                                            <motion.div
-                                                key={farmer.id}
-                                                whileHover={{ x: 5 }}
-                                                className="card"
-                                                style={{ display: 'flex', alignItems: 'center', gap: '2rem', padding: '1.5rem' }}
-                                            >
-                                                <div style={{ fontSize: '3rem' }}>👨‍🌾</div>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.25rem' }}>
-                                                        <h3 style={{ fontSize: '1.25rem' }}>{farmer.full_name || 'Farmer'}</h3>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#B8860B', fontSize: '0.9rem', fontWeight: 700 }}>
-                                                            <Star size={16} fill="#B8860B" /> {farmer.rating || '4.5'}
-                                                        </div>
-                                                    </div>
-                                                    <div style={{ display: 'flex', gap: '1.5rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                                            <MapPin size={14} /> {farmer.location || 'Location N/A'}
-                                                        </span>
-                                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                                            🌾 {farmer.land_size ? `${farmer.land_size} Acres` : 'N/A'}
-                                                        </span>
-                                                    </div>
-                                                    <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                                                        {(farmer.crop_history || []).slice(0, 3).map((crop, idx) => (
-                                                            <span key={idx} style={{ padding: '0.25rem 0.75rem', background: 'rgba(45, 90, 39, 0.05)', borderRadius: 'var(--radius-full)', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600 }}>{crop}</span>
-                                                        ))}
+                                    {farmers.map(farmer => (
+                                        <motion.div
+                                            key={farmer.id}
+                                            whileHover={{ y: -4 }}
+                                            className="card card-business"
+                                            style={{ display: 'grid', gridTemplateColumns: '80px 1fr 200px', alignItems: 'center', gap: '2.5rem', padding: '2.5rem' }}
+                                        >
+                                            <div style={{
+                                                width: '80px', height: '80px', borderRadius: '16px',
+                                                background: 'var(--sand-light)', display: 'flex',
+                                                alignItems: 'center', justifyContent: 'center',
+                                                fontSize: '2rem'
+                                            }}>👨‍🌾</div>
+
+                                            <div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                                                    <h3 style={{ fontSize: '1.5rem', margin: 0 }}>{farmer.full_name || 'Enterprise Farmer'}</h3>
+                                                    <div style={{
+                                                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                                        background: 'var(--sand-light)', padding: '0.25rem 0.6rem',
+                                                        borderRadius: '8px', fontSize: '0.85rem', fontWeight: 800, color: 'var(--forest)'
+                                                    }}>
+                                                        <Star size={14} fill="var(--forest)" /> {farmer.rating || '4.8'}
                                                     </div>
                                                 </div>
-                                                <button className="btn btn-secondary">View Profile</button>
+
+                                                <div style={{ display: 'flex', gap: '2rem', color: 'var(--olive)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                        <MapPin size={16} /> {farmer.location}
+                                                    </span>
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                        <Database size={16} /> {farmer.land_size || '12.5'} Acres
+                                                    </span>
+                                                </div>
+
+                                                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                                    {(farmer.crop_history || ['Wheat', 'Organic Soy']).map((crop, idx) => (
+                                                        <span key={idx} style={{
+                                                            padding: '0.4rem 0.8rem', background: 'var(--sand-light)',
+                                                            borderRadius: '8px', fontSize: '0.8rem', color: 'var(--olive)',
+                                                            fontWeight: 700, border: '1px solid var(--border-light)'
+                                                        }}>{crop}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                                 <button className="btn btn-primary" onClick={() => { setSelectedFarmer(farmer); setShowContract(true); }}>
-                                                    Select Farmer <ArrowRight size={18} />
+                                                    Establish Contract
                                                 </button>
-                                            </motion.div>
-                                        ))
-                                    )}
+                                                <button className="btn btn-secondary">Audit Profile</button>
+                                            </div>
+                                        </motion.div>
+                                    ))}
                                 </div>
                             </section>
                         </div>
@@ -312,132 +265,113 @@ const BusinessDashboard = () => {
                 )}
 
                 {activeTab === 'financing' && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ maxWidth: '900px', margin: '0 auto' }}>
-                        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                            <div style={{
-                                width: '80px', height: '80px', background: 'rgba(45, 90, 39, 0.1)',
-                                color: 'var(--primary)', borderRadius: '50%', display: 'flex',
-                                alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem'
-                            }}>
-                                <Landmark size={40} />
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+                            <div style={{ color: 'var(--blue-trust)', marginBottom: '2rem' }}>
+                                <Landmark size={64} strokeWidth={1.5} />
                             </div>
-                            <h1 style={{ fontSize: '2.5rem' }}>Institutional Credit</h1>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '1rem auto' }}>
-                                Access low-interest working capital by leveraging your active platform contracts as collateral.
-                            </p>
+                            <h2 style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>Strategic Liquidity</h2>
+                            <p style={{ fontSize: '1.25rem', color: 'var(--olive)', maxWidth: '700px', margin: '0 auto' }}>Leverage your procurement portfolio to unlock institutional grade working capital.</p>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
-                            <div className="card" style={{ padding: '2rem', border: '1px solid var(--primary)', background: 'white' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                                    <ShieldCheck color="var(--primary)" />
-                                    <h3 style={{ margin: 0 }}>Trust Indicators</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem', marginBottom: '4rem' }}>
+                            <div className="card card-business" style={{ padding: '3rem', borderTop: '4px solid var(--blue-trust)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+                                    <ShieldCheck className="text-olive" />
+                                    <h3 style={{ fontSize: '1.5rem', margin: 0 }}>Entity Analysis</h3>
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
-                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Platform Trust Score</span>
-                                        <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{trustScore}/100</span>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
-                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>KYC Status</span>
-                                        <span style={{ fontWeight: 700, color: profile?.kyc_status === 'verified' ? 'var(--success)' : '#F59E0B', fontSize: '0.8rem' }}>
-                                            {profile?.kyc_status === 'verified' ? 'VERIFIED' : 'PENDING'}
-                                        </span>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Contract Reliability</span>
-                                        <span style={{ fontWeight: 700 }}>96%</span>
-                                    </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    {[
+                                        { label: 'Network Reliability', value: '96.2%', status: 'optimal' },
+                                        { label: 'KYC Verification', value: 'Complete', status: 'verified' },
+                                        { label: 'Payment Velocity', value: 'A+', status: 'prime' }
+                                    ].map((item, i) => (
+                                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '1rem', borderBottom: '1px solid var(--border-light)' }}>
+                                            <span style={{ color: 'var(--olive)', fontWeight: 600 }}>{item.label}</span>
+                                            <span style={{ fontWeight: 800, color: 'var(--forest)' }}>{item.value}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
-                            <div className="card" style={{ padding: '2rem', border: '1px solid var(--primary)', background: 'white' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                                    <Banknote color="var(--primary)" />
-                                    <h3 style={{ margin: 0 }}>Collateral Value</h3>
+                            <div className="card card-business" style={{ padding: '3rem', borderTop: '4px solid var(--gold)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+                                    <Banknote className="text-olive" />
+                                    <h3 style={{ fontSize: '1.5rem', margin: 0 }}>Collateralized Asset Value</h3>
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
-                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Active Contracts</span>
-                                        <span style={{ fontWeight: 700 }}>{activeContractsCount} Active</span>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
-                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Total Contract Value</span>
-                                        <span style={{ fontWeight: 700 }}>₹{(totalContractValue / 100000).toFixed(1)}L</span>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Eligibility Coverage</span>
-                                        <span style={{ fontWeight: 800, color: 'var(--primary)' }}>₹{(totalContractValue * 0.4 / 100000).toFixed(1)}L</span>
-                                    </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    {[
+                                        { label: 'Active Open Contracts', value: activeContractsCount },
+                                        { label: 'Total Portfolio Value', value: `₹${(totalContractValue / 100000).toFixed(1)}L` },
+                                        { label: 'Strategic Credit Limit', value: `₹${(totalContractValue * 0.4 / 100000).toFixed(1)}L`, featured: true }
+                                    ].map((item, i) => (
+                                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '1rem', borderBottom: '1px solid var(--border-light)' }}>
+                                            <span style={{ color: 'var(--olive)', fontWeight: 600 }}>{item.label}</span>
+                                            <span style={{ fontWeight: 800, color: item.featured ? 'var(--gold)' : 'var(--forest)', fontSize: item.featured ? '1.25rem' : '1rem' }}>{item.value}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
 
-                        <div className="card" style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc' }}>
-                            <h3 style={{ marginBottom: '1rem' }}>Ready to fuel your growth?</h3>
-                            <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Apply for a business loan today and get approved within 24 hours based on your platform performance.</p>
-                            <button className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem' }} onClick={() => setShowLoanFlow(true)}>
-                                Initialize Loan Application
+                        <div className="card card-business" style={{ padding: '4rem', textAlign: 'center', background: 'var(--sand-light)', border: '1px dashed var(--blue-trust)' }}>
+                            <h3 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Capitalize on Network Velocity</h3>
+                            <p style={{ color: 'var(--olive)', marginBottom: '3rem', fontSize: '1.1rem' }}>Our institutional partners approve lines of credit based on your platform contract history.</p>
+                            <button className="btn btn-primary" style={{ padding: '1.25rem 4rem', fontSize: '1.1rem' }} onClick={() => setShowLoanFlow(true)}>
+                                Initialize Line of Credit
                             </button>
                         </div>
                     </motion.div>
                 )}
 
                 {activeTab === 'quality' && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <div style={{ marginBottom: '3rem' }}>
-                            <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{t('quality.title')}</h1>
-                            <p style={{ color: 'var(--text-muted)' }}>{t('quality.desc')}</p>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
-                            <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '3rem' }}>
+                            <div className="card card-business" style={{ padding: 0, overflow: 'hidden' }}>
                                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                     <thead>
-                                        <tr style={{ background: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
-                                            <th style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('quality.batchId')}</th>
-                                            <th style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Farmer / {t('quality.crop')}</th>
-                                            <th style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('quality.status')}</th>
-                                            <th style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('quality.params')}</th>
-                                            <th style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}></th>
+                                        <tr style={{ background: 'var(--sand-light)', borderBottom: '1px solid var(--border-light)' }}>
+                                            <th style={{ padding: '1.5rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--olive)' }}>SERIAL ID</th>
+                                            <th style={{ padding: '1.5rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--olive)' }}>ENTITY / COMMODITY</th>
+                                            <th style={{ padding: '1.5rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--olive)' }}>INTELLIGENCE STATUS</th>
+                                            <th style={{ padding: '1.5rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--olive)' }}>PARAMETERS</th>
+                                            <th style={{ padding: '1.5rem' }}></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {qualityBatches.map(batch => (
-                                            <tr key={batch.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                                <td style={{ padding: '1.25rem', fontWeight: 600, fontSize: '0.9rem' }}>{batch.id}</td>
-                                                <td style={{ padding: '1.25rem' }}>
-                                                    <div style={{ fontWeight: 600 }}>{batch.farmer}</div>
-                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{batch.crop}</div>
+                                            <tr key={batch.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                                                <td style={{ padding: '1.5rem', fontWeight: 800, fontSize: '0.9rem', color: 'var(--forest)' }}>{batch.id}</td>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <div style={{ fontWeight: 800, color: 'var(--forest)' }}>{batch.farmer}</div>
+                                                    <div style={{ fontSize: '0.85rem', color: 'var(--olive)' }}>{batch.crop}</div>
                                                 </td>
-                                                <td style={{ padding: '1.25rem' }}>
+                                                <td style={{ padding: '1.5rem' }}>
                                                     <span style={{
-                                                        padding: '0.25rem 0.75rem',
-                                                        borderRadius: 'var(--radius-full)',
+                                                        padding: '0.4rem 0.8rem',
+                                                        borderRadius: '8px',
                                                         fontSize: '0.75rem',
-                                                        fontWeight: 700,
-                                                        background: batch.status === 'Optimal' ? 'rgba(16, 185, 129, 0.1)' :
-                                                            batch.status === 'Certified' ? 'rgba(45, 90, 39, 0.1)' : 'rgba(212, 175, 55, 0.1)',
-                                                        color: batch.status === 'Optimal' ? 'var(--success)' :
-                                                            batch.status === 'Certified' ? 'var(--primary)' : '#B8860B'
+                                                        fontWeight: 800,
+                                                        background: 'var(--sand-light)',
+                                                        color: batch.status === 'Optimal' ? 'var(--forest)' : '#B8860B',
+                                                        border: '1px solid var(--border-light)'
                                                     }}>
-                                                        {batch.status === 'Certified' ? t('quality.certified') :
-                                                            batch.status === 'Monitoring' ? t('quality.monitored') : batch.status}
+                                                        {batch.status.toUpperCase()}
                                                     </span>
                                                 </td>
-                                                <td style={{ padding: '1.25rem' }}>
-                                                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem' }}>
-                                                        <div><span style={{ color: 'var(--text-muted)' }}>{t('quality.moisture')}:</span> {batch.moisture}</div>
-                                                        <div><span style={{ color: 'var(--text-muted)' }}>{t('quality.purity')}:</span> {batch.purity}</div>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.85rem' }}>
+                                                        <div><span style={{ color: 'var(--olive)', fontWeight: 600 }}>MST:</span> {batch.moisture}</div>
+                                                        <div><span style={{ color: 'var(--olive)', fontWeight: 600 }}>PRY:</span> {batch.purity}</div>
                                                     </div>
                                                 </td>
-                                                <td style={{ padding: '1.25rem', textAlign: 'right' }}>
+                                                <td style={{ padding: '1.5rem', textAlign: 'right' }}>
                                                     <button style={{
-                                                        background: 'none', border: 'none', color: 'var(--primary)',
-                                                        fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
-                                                        display: 'flex', alignItems: 'center', gap: '0.25rem'
+                                                        background: 'none', border: 'none', color: 'var(--olive)',
+                                                        fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer',
+                                                        display: 'flex', alignItems: 'center', gap: '0.4rem'
                                                     }}>
-                                                        {t('quality.viewReport')} <ArrowRight size={14} />
+                                                        REPORT <ArrowRight size={14} />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -446,21 +380,26 @@ const BusinessDashboard = () => {
                                 </table>
                             </div>
 
-                            <aside style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                <div className="card" style={{ padding: '1.5rem', background: 'var(--primary)', color: 'white' }}>
-                                    <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>{t('quality.estimate')}</h3>
-                                    <div style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>45.2 Tons</div>
-                                    <p style={{ fontSize: '0.85rem', opacity: 0.8 }}>Expected total yield across all active tracked contracts.</p>
+                            <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                <div className="card card-business" style={{ padding: '2.5rem', background: 'var(--forest)', color: 'white' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                                        <TrendingUp className="text-gold" />
+                                        <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em' }}>PORTFOLIO YIELD</span>
+                                    </div>
+                                    <div style={{ fontSize: '3rem', fontWeight: 400, fontFamily: 'var(--font-heading)', marginBottom: '0.5rem' }}>45.2 <span style={{ fontSize: '1.25rem' }}>TONS</span></div>
+                                    <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>Projected aggregate yield across active procurement portfolio.</p>
                                 </div>
-                                <div className="card" style={{ padding: '1.5rem' }}>
-                                    <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>{t('quality.lastUpdate')}</h3>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                        <CheckCircle size={16} color="var(--success)" />
-                                        All sensors active
+
+                                <div className="card card-business" style={{ padding: '2.5rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--olive)' }}>
+                                        <Microscope size={20} />
+                                        <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em' }}>SENSOR NETWORK</span>
                                     </div>
-                                    <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                        Satellite data refreshed 45 mins ago.
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                                        <div style={{ width: '8px', height: '8px', background: 'var(--forest)', borderRadius: '50%' }}></div>
+                                        <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>All streams operational</span>
                                     </div>
+                                    <p style={{ fontSize: '0.85rem', color: 'var(--olive)' }}>Satellite telemetry synced 42 minutes ago from regional nodes.</p>
                                 </div>
                             </aside>
                         </div>
@@ -473,39 +412,49 @@ const BusinessDashboard = () => {
                 {showModal && (
                     <div style={{
                         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+                        background: 'rgba(28, 48, 25, 0.4)', backdropFilter: 'blur(12px)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '2rem'
                     }}>
-                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="card" style={{ maxWidth: '600px', width: '100%', padding: '3rem' }}>
-                            <h2 style={{ marginBottom: '2rem' }}>Post Crop Requirement</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                <div className="input-group">
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Crops Needed</label>
-                                    <select style={{ width: '100%', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="card card-business" style={{ maxWidth: '600px', width: '100%', padding: '4rem', background: 'white' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Post Procurement</h2>
+                                    <p style={{ color: 'var(--olive)' }}>Specify commodity requirements for recruitment.</p>
+                                </div>
+                                <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: 'var(--olive)', cursor: 'pointer' }}><X /></button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.8rem', color: 'var(--olive)' }}>COMMODITY CATEGORY</label>
+                                    <select className="input" style={{ width: '100%', padding: '1rem' }}>
                                         {cropCategories.map(cat => (
                                             <optgroup key={cat.name} label={cat.name}>
-                                                {cat.crops.map(crop => (
-                                                    <option key={crop} value={crop}>{crop}</option>
-                                                ))}
+                                                {cat.crops.map(crop => <option key={crop} value={crop}>{crop}</option>)}
                                             </optgroup>
                                         ))}
                                     </select>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <input type="number" placeholder="Quantity (Quintals)" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)' }} />
-                                    <input type="number" placeholder="Price ₹" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)' }} />
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.8rem', color: 'var(--olive)' }}>QUANTITY (QTL)</label>
+                                        <input type="number" className="input" placeholder="e.g. 500" style={{ width: '100%', padding: '1rem' }} />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 800, fontSize: '0.8rem', color: 'var(--olive)' }}>TARGET UNIT PRICE (₹)</label>
+                                        <input type="number" className="input" placeholder="e.g. 2100" style={{ width: '100%', padding: '1rem' }} />
+                                    </div>
                                 </div>
-                                <textarea rows="3" placeholder="Describe organic methods, seed variety..." style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', fontFamily: 'inherit' }} />
-                                <div style={{ display: 'flex', gap: '1rem' }}>
-                                    <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Cancel</button>
-                                    <button className="btn btn-primary" style={{ flex: 2 }} onClick={() => setShowModal(false)}>Post Requirement</button>
-                                </div>
+
+                                <button className="btn btn-primary" style={{ padding: '1.25rem', marginTop: '1rem' }} onClick={() => setShowModal(false)}>Publish Requirement</button>
                             </div>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
 
+            {/* Other Flow Modals */}
             <AnimatePresence>
                 {showLoanFlow && (
                     <LoanApplicationFlow onClose={() => setShowLoanFlow(false)} onComplete={() => setShowLoanFlow(false)} />
@@ -516,7 +465,7 @@ const BusinessDashboard = () => {
                 {showContract && selectedFarmer && (
                     <div style={{
                         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                        background: 'rgba(28, 48, 25, 0.6)', backdropFilter: 'blur(16px)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '2rem'
                     }}>
                         <ContractFlow farmer={selectedFarmer} onClose={() => { setShowContract(false); setSelectedFarmer(null); }} onComplete={() => { setShowContract(false); setSelectedFarmer(null); }} />

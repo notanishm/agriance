@@ -1,6 +1,21 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Landmark, CreditCard, PieChart, FileCheck, ChevronRight, ArrowLeft, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import {
+    Landmark,
+    CreditCard,
+    PieChart,
+    FileCheck,
+    ChevronRight,
+    ArrowLeft,
+    Loader2,
+    CheckCircle2,
+    AlertCircle,
+    ShieldCheck,
+    Lock,
+    Scale,
+    Activity,
+    X
+} from 'lucide-react';
 import { partnerBanks } from '../data/loans';
 import FileUpload from './FileUpload';
 import { BankLMSService } from '../services/bankLMS';
@@ -31,10 +46,7 @@ const LoanApplicationFlow = ({ onClose, onComplete }) => {
             setIsProcessing(true);
             setError(null);
 
-            // Generate unique application number
             const applicationNumber = `APL-${Date.now()}`;
-
-            // Mock data for risk scoring (in real app, fetch from user's contracts)
             const applicationData = {
                 landArea: 5,
                 cropValue: 1,
@@ -44,10 +56,9 @@ const LoanApplicationFlow = ({ onClose, onComplete }) => {
             };
 
             const riskScore = BankLMSService.calculateRiskScore(applicationData);
-            
-            // Save loan application to database
+
             const loanData = {
-                farmer_id: user.id, // Could be business_id if called from business dashboard
+                farmer_id: user.id,
                 application_number: applicationNumber,
                 loan_amount: parseFloat(amount),
                 tenure_months: parseInt(tenure),
@@ -55,21 +66,18 @@ const LoanApplicationFlow = ({ onClose, onComplete }) => {
                 bank_name: selectedBank?.name,
                 status: 'pending',
                 risk_score: riskScore,
-                applicant_type: 'farmer' // or 'business' depending on context
+                applicant_type: 'farmer'
             };
 
-            // Try to save as farmer first, if fails try as business
             let saveResult;
             try {
                 saveResult = await farmerService.createLoanApplication(loanData);
             } catch (err) {
-                // If user is not a farmer, try saving as business
                 saveResult = await businessService.createLoanApplication(loanData);
             }
 
             if (saveResult.error) throw saveResult.error;
 
-            // Create mock bank payload for LMS simulation
             const payload = BankLMSService.createLoanPayload(
                 { id: user.id, name: user.email, kycStatus: 'verified' },
                 { id: 'C-505', totalValue: 200000, cropName: 'Wheat' },
@@ -87,278 +95,378 @@ const LoanApplicationFlow = ({ onClose, onComplete }) => {
         }
     };
 
+    const steps = [
+        { id: 1, label: 'INSTITUTION' },
+        { id: 2, label: 'CAPITAL' },
+        { id: 3, label: 'EVIDENCE' },
+        { id: 4, label: 'EXECUTION' }
+    ];
+
     return (
         <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+            background: 'rgba(14, 46, 33, 0.4)', backdropFilter: 'blur(12px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '2rem'
         }}>
             <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="card"
-                style={{ maxWidth: '700px', width: '100%', padding: '0', overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                style={{
+                    maxWidth: '850px',
+                    width: '100%',
+                    background: 'white',
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    maxHeight: '90vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxShadow: '0 40px 100px rgba(0,0,0,0.25)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)'
+                }}
             >
-                {/* Header */}
-                <div style={{ padding: '2rem 3rem', background: 'var(--primary)', color: 'white' }}>
+                {/* Institutional Header */}
+                <div style={{ padding: '2rem 3rem', background: 'var(--blue-trust)', color: 'var(--sand)', position: 'relative' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <Landmark size={28} /> Apply for Agriculture Loan
-                        </h2>
-                        <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                        <div>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.2em', opacity: 0.7, marginBottom: '0.5rem' }}>FINANCIAL PROTOCOL</div>
+                            <h2 style={{ margin: 0, fontSize: '2rem', fontFamily: 'var(--font-heading)' }}>Apply for <span className="text-gold">Credit Liquidity</span></h2>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                border: 'none',
+                                color: 'white',
+                                width: '40px', height: '40px',
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(215, 87, 87, 0.2)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                        >
+                            <X size={20} />
+                        </button>
                     </div>
                 </div>
 
-                {/* Stepper */}
-                <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
-                    {[1, 2, 3, 4].map(s => (
+                {/* Refined Stepper */}
+                <div style={{ display: 'flex', background: 'var(--sand-light)', padding: '0 3rem' }}>
+                    {steps.map((s, i) => (
                         <div
-                            key={s}
-                            onClick={() => goToStep(s)}
+                            key={s.id}
+                            onClick={() => goToStep(s.id)}
                             style={{
                                 flex: 1,
-                                padding: '1rem',
+                                padding: '1.5rem 0',
                                 textAlign: 'center',
-                                borderBottom: step === s ? '3px solid var(--primary)' : 'none',
-                                color: step === s ? 'var(--primary)' : s < step ? 'var(--success)' : 'var(--text-muted)',
-                                fontWeight: step === s || s < step ? 700 : 400,
-                                fontSize: '0.8rem',
-                                cursor: s < step ? 'pointer' : 'default',
-                                transition: 'all 0.2s'
+                                borderBottom: step === s.id ? '2px solid var(--blue-trust)' : '2px solid transparent',
+                                opacity: step === s.id ? 1 : 0.4,
+                                color: step === s.id ? 'var(--blue-trust)' : 'var(--olive)',
+                                fontWeight: 800,
+                                fontSize: '0.65rem',
+                                letterSpacing: '0.2em',
+                                cursor: s.id < step ? 'pointer' : 'default',
+                                transition: 'all 0.4s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.75rem'
                             }}
                         >
-                            {s < step ? '✓' : `STEP ${s}`}
+                            <div style={{
+                                width: '20px', height: '20px',
+                                borderRadius: '50%',
+                                border: `1px solid ${step >= s.id ? 'var(--blue-trust)' : 'var(--olive)'}`,
+                                background: step > s.id ? 'var(--blue-trust)' : 'transparent',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '0.6rem', color: step > s.id ? 'white' : 'inherit'
+                            }}>
+                                {s.id < step ? '✓' : s.id}
+                            </div>
+                            {s.label}
                         </div>
                     ))}
                 </div>
 
-                <div style={{ padding: '3rem', overflowY: 'auto', flex: 1 }}>
-                    {step === 1 && (
-                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                            <h3 style={{ marginBottom: '1.5rem' }}>Select Preferred Bank</h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {partnerBanks.map(bank => (
-                                    <div
-                                        key={bank.id}
-                                        onClick={() => setSelectedBank(bank)}
-                                        style={{
-                                            padding: '1.5rem',
-                                            border: `2px solid ${selectedBank?.id === bank.id ? 'var(--primary)' : 'var(--border)'}`,
-                                            borderRadius: 'var(--radius-md)',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '1.5rem',
-                                            transition: 'all 0.2s',
-                                            background: selectedBank?.id === bank.id ? 'rgba(45, 90, 39, 0.03)' : 'white'
-                                        }}
-                                    >
-                                        <div style={{ fontSize: '2.5rem' }}>{bank.icon}</div>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{bank.name}</div>
-                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Interest from {bank.minInterest} • Max {bank.maxTenure}</div>
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#B8860B' }}>★ {bank.rating}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <button
-                                className="btn btn-primary"
-                                style={{ width: '100%', marginTop: '2rem' }}
-                                disabled={!selectedBank}
-                                onClick={handleNext}
+                <div style={{ padding: '3.5rem', overflowY: 'auto', flex: 1 }} className="agri-pattern-light">
+                    <AnimatePresence mode="wait">
+                        {step === 1 && (
+                            <motion.div
+                                key="step1"
+                                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                             >
-                                Continue <ChevronRight size={18} />
-                            </button>
-                        </motion.div>
-                    )}
-
-                    {step === 2 && (
-                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                            <h3 style={{ marginBottom: '1.5rem' }}>Loan Details</h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Requested Amount (₹)</label>
-                                    <input
-                                        type="number"
-                                        value={amount}
-                                        onChange={(e) => setAmount(e.target.value)}
-                                        placeholder="e.g. 150000"
-                                        style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
-                                    />
+                                <div style={{ marginBottom: '2.5rem' }}>
+                                    <h3 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Select <span className="text-gold">Partner</span> Institution</h3>
+                                    <p style={{ color: 'var(--olive)', fontWeight: 500 }}>Choose a banking node from our verified credit ecosystem.</p>
                                 </div>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Repayment Tenure (Months)</label>
-                                    <select
-                                        value={tenure}
-                                        onChange={(e) => setTenure(e.target.value)}
-                                        style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
-                                    >
-                                        <option value="6">6 Months</option>
-                                        <option value="12">12 Months (Recommended)</option>
-                                        <option value="24">24 Months</option>
-                                        <option value="36">36 Months</option>
-                                    </select>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                                    {partnerBanks.map(bank => (
+                                        <motion.div
+                                            whileHover={{ scale: 1.01, x: 5 }}
+                                            key={bank.id}
+                                            onClick={() => setSelectedBank(bank)}
+                                            style={{
+                                                padding: '1.5rem 2rem',
+                                                border: `1px solid ${selectedBank?.id === bank.id ? 'var(--blue-trust)' : 'var(--border-light)'}`,
+                                                borderRadius: '16px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '2rem',
+                                                transition: 'all 0.3s ease',
+                                                background: selectedBank?.id === bank.id ? 'rgba(14, 46, 33, 0.03)' : 'white',
+                                                boxShadow: selectedBank?.id === bank.id ? '0 10px 30px rgba(14, 46, 33, 0.05)' : 'none'
+                                            }}
+                                        >
+                                            <div style={{ fontSize: '2.5rem', filter: selectedBank?.id === bank.id ? 'none' : 'grayscale(1)' }}>{bank.icon}</div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--blue-trust)' }}>{bank.name}</div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--olive)', fontWeight: 600, opacity: 0.7 }}>Starting {bank.minInterest} • Term up to {bank.maxTenure}</div>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--gold)', letterSpacing: '0.1em' }}>PRECISION RATING</div>
+                                                <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--blue-trust)' }}>★ {bank.rating}</div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
                                 </div>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Purpose of Loan</label>
-                                    <textarea
-                                        rows="3"
-                                        value={purpose}
-                                        onChange={(e) => setPurpose(e.target.value)}
-                                        placeholder="Briefly describe what you will use the funds for..."
-                                        style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontFamily: 'inherit' }}
-                                    />
+                                <button
+                                    className="btn btn-primary"
+                                    style={{ width: '100%', marginTop: '3rem', padding: '1.25rem', fontSize: '1rem', fontWeight: 800 }}
+                                    disabled={!selectedBank}
+                                    onClick={handleNext}
+                                >
+                                    PROCEED TO TERMS <ChevronRight size={18} />
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {step === 2 && (
+                            <motion.div
+                                key="step2"
+                                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.4 }}
+                            >
+                                <div style={{ marginBottom: '2.5rem' }}>
+                                    <h3 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Configure <span className="text-gold">Loan</span> Parameters</h3>
+                                    <p style={{ color: 'var(--olive)', fontWeight: 500 }}>Specify your capital requirements and repayment frequency.</p>
                                 </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={handleBack}><ArrowLeft size={18} /> Back</button>
-                                <button className="btn btn-primary" style={{ flex: 2 }} onClick={handleNext} disabled={!amount}>Next Step <ChevronRight size={18} /></button>
-                            </div>
-                        </motion.div>
-                    )}
 
-                    {step === 3 && (
-                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                            <h3 style={{ marginBottom: '1rem' }}>Support Documents</h3>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Platform data (KYC & Contracts) is automatically shared with the bank.</p>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <FileUpload
-                                    label="Bank Statement (3 Months)"
-                                    value={bankStatement}
-                                    onFileSelect={setBankStatement}
-                                    accept=".pdf,.jpg,.png"
-                                />
-                                <FileUpload
-                                    label="Land Record (Optional)"
-                                    value={landRecord}
-                                    onFileSelect={setLandRecord}
-                                    accept=".pdf,.jpg,.png"
-                                />
-                                <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: 'var(--radius-sm)' }}>
-                                    <FileCheck color="var(--success)" size={24} />
-                                    <span style={{ fontSize: '0.85rem', color: 'var(--success)', fontWeight: 600 }}>Platform KYC & Contracts Linked</span>
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={handleBack}><ArrowLeft size={18} /> Back</button>
-                                <button className="btn btn-primary" style={{ flex: 2 }} onClick={handleNext}>Review Application <ChevronRight size={18} /></button>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {step === 4 && (
-                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                            {decision ? (
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{
-                                        width: '80px', height: '80px',
-                                        background: decision.decision === 'APPROVED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                        color: decision.decision === 'APPROVED' ? 'var(--success)' : '#EF4444',
-                                        borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        margin: '0 auto 1.5rem'
-                                    }}>
-                                        {decision.decision === 'APPROVED' ? <CheckCircle2 size={40} /> : <AlertCircle size={40} />}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                    <div style={{ gridColumn: 'span 2' }}>
+                                        <label className="form-label">REQUESTED CAPITAL (₹)</label>
+                                        <input
+                                            type="number"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            placeholder="Enter numeric value"
+                                            className="form-input"
+                                            style={{ fontSize: '1.25rem' }}
+                                        />
                                     </div>
-                                    <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
-                                        Application {decision.decision}
-                                    </h3>
-                                    <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
-                                        Ref: {decision.bankReference}
-                                    </p>
+                                    <div>
+                                        <label className="form-label">REPAYMENT TENURE</label>
+                                        <select
+                                            value={tenure}
+                                            onChange={(e) => setTenure(e.target.value)}
+                                            className="form-select"
+                                        >
+                                            <option value="6">6 Months (Tactical)</option>
+                                            <option value="12">12 Months (Standard)</option>
+                                            <option value="24">24 Months (Developmental)</option>
+                                            <option value="36">36 Months (Long-term)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="form-label">FACILITY PURPOSE</label>
+                                        <select
+                                            className="form-select"
+                                            value={purpose}
+                                            onChange={(e) => setPurpose(e.target.value)}
+                                        >
+                                            <option value="">Select utilization...</option>
+                                            <option value="Input Procurement">Input Procurement</option>
+                                            <option value="Equipment Leasing">Equipment Leasing</option>
+                                            <option value="Infrastructure Growth">Infrastructure Growth</option>
+                                            <option value="Operational Liquidity">Operational Liquidity</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-                                    {decision.decision === 'APPROVED' ? (
-                                        <div className="card" style={{ padding: '1.5rem', background: '#fcfdfa', textAlign: 'left', marginBottom: '2rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                                <span>Interest Rate</span>
-                                                <span style={{ fontWeight: 700 }}>{decision.financialTerms.interestRate} p.a.</span>
-                                            </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                                <span>Processing Fee</span>
-                                                <span>{decision.financialTerms.processingFee}</span>
-                                            </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <span>Disbursal</span>
-                                                <span>{decision.financialTerms.disbursalTime}</span>
-                                            </div>
+                                <div style={{ display: 'flex', gap: '1.5rem', marginTop: '4rem' }}>
+                                    <button className="btn-secondary" style={{ flex: 1, background: 'transparent', border: '1px solid var(--border-light)', fontWeight: 800, cursor: 'pointer' }} onClick={handleBack}><ArrowLeft size={18} /> BACK</button>
+                                    <button className="btn btn-primary" style={{ flex: 2, padding: '1.25rem', fontSize: '1rem', fontWeight: 800 }} onClick={handleNext} disabled={!amount}>UPLOAD EVIDENCE <ChevronRight size={18} /></button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {step === 3 && (
+                            <motion.div
+                                key="step3"
+                                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.4 }}
+                            >
+                                <div style={{ marginBottom: '2.5rem' }}>
+                                    <h3 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Support <span className="text-gold">Evidence</span></h3>
+                                    <p style={{ color: 'var(--olive)', fontWeight: 500 }}>Strengthen your application with institutional documentation.</p>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                    <FileUpload
+                                        label="BANK STATEMENT (LAST 3 MONTHS)"
+                                        value={bankStatement}
+                                        onFileSelect={setBankStatement}
+                                        accept=".pdf,.jpg,.png"
+                                    />
+                                    <FileUpload
+                                        label="LAND RECORD / TITLE (OPTIONAL)"
+                                        value={landRecord}
+                                        onFileSelect={setLandRecord}
+                                        accept=".pdf,.jpg,.png"
+                                    />
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1.5rem', background: 'var(--sand-light)', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+                                        <div style={{ padding: '0.75rem', background: 'white', borderRadius: '12px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+                                            <ShieldCheck color="var(--blue-trust)" size={24} />
                                         </div>
-                                    ) : (
-                                        <p style={{ color: '#EF4444', marginBottom: '2rem' }}>
-                                            {decision.financialTerms.reason}
+                                        <div>
+                                            <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--blue-trust)', letterSpacing: '0.05em' }}>AUTOMATIC DATA SYNC</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--olive)', fontWeight: 600, opacity: 0.7 }}>Verified KYC & Active Proof-of-Crop are already linked.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '1.5rem', marginTop: '4rem' }}>
+                                    <button className="btn-secondary" style={{ flex: 1, background: 'transparent', border: '1px solid var(--border-light)', fontWeight: 800, cursor: 'pointer' }} onClick={handleBack}><ArrowLeft size={18} /> BACK</button>
+                                    <button className="btn btn-primary" style={{ flex: 2, padding: '1.25rem', fontSize: '1rem', fontWeight: 800 }} onClick={handleNext}>REVIEW AUDIT <ChevronRight size={18} /></button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {step === 4 && (
+                            <motion.div
+                                key="step4"
+                                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+                            >
+                                {decision ? (
+                                    <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+                                        <motion.div
+                                            initial={{ scale: 0.8 }} animate={{ scale: 1 }}
+                                            style={{
+                                                width: '100px', height: '100px',
+                                                background: decision.decision === 'APPROVED' ? 'var(--blue-trust)' : 'var(--terracotta)',
+                                                color: 'white',
+                                                borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                margin: '0 auto 2.5rem',
+                                                boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+                                            }}
+                                        >
+                                            {decision.decision === 'APPROVED' ? <CheckCircle2 size={48} strokeWidth={1.5} /> : <AlertCircle size={48} strokeWidth={1.5} />}
+                                        </motion.div>
+                                        <h3 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
+                                            Application {decision.decision}
+                                        </h3>
+                                        <p style={{ color: 'var(--olive)', fontSize: '1.2rem', marginBottom: '3rem', fontWeight: 500 }}>
+                                            NODE REF: <span style={{ fontWeight: 800, letterSpacing: '0.05em' }}>{decision.bankReference}</span>
                                         </p>
-                                    )}
 
-                                    <button
-                                        className="btn btn-primary"
-                                        style={{ width: '100%' }}
-                                        onClick={onClose}
-                                    >
-                                        Back to Dashboard
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
-                                    <h3 style={{ marginBottom: '1.5rem' }}>Application Review</h3>
-                                    <div className="card" style={{ padding: '1.5rem', background: '#f8fafc', border: '1px solid var(--border)', marginBottom: '2rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                            <span style={{ color: 'var(--text-muted)' }}>Beneficiary Bank</span>
-                                            <span style={{ fontWeight: 600 }}>{selectedBank?.name}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                            <span style={{ color: 'var(--text-muted)' }}>Loan Amount</span>
-                                            <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '1.1rem' }}>₹{parseInt(amount).toLocaleString()}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                            <span style={{ color: 'var(--text-muted)' }}>Tenure</span>
-                                            <span style={{ fontWeight: 600 }}>{tenure} Months</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0' }}>
-                                            <span style={{ color: 'var(--text-muted)' }}>Estimated Interest</span>
-                                            <span style={{ fontWeight: 600 }}>~{selectedBank?.minInterest} p.a.</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: 'var(--text-muted)' }}>Documents Uploaded</span>
-                                            <span style={{ color: 'var(--success)', fontWeight: 600, fontSize: '0.8rem' }}>Verified ✓</span>
-                                        </div>
-                                    </div>
-                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
-                                        By submitting, you authorize {selectedBank?.name} to access your platform profile, land records, and contract history for credit evaluation.
-                                    </p>
-                                    
-                                    {error && (
-                                        <div style={{ 
-                                            marginBottom: '1rem', 
-                                            padding: '1rem', 
-                                            background: 'rgba(239, 68, 68, 0.1)', 
-                                            borderRadius: 'var(--radius-sm)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem',
-                                            color: '#ef4444'
-                                        }}>
-                                            <AlertCircle size={18} />
-                                            <span style={{ fontSize: '0.9rem' }}>{error}</span>
-                                        </div>
-                                    )}
-                                    
-                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                                        <button className="btn btn-secondary" style={{ flex: 1 }} onClick={handleBack} disabled={isProcessing}><ArrowLeft size={18} /> Back</button>
+                                        {decision.decision === 'APPROVED' ? (
+                                            <div style={{ background: 'var(--sand-light)', padding: '2.5rem', borderRadius: '24px', textAlign: 'left', marginBottom: '3rem', border: '1px solid var(--border-light)' }}>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                                    <div>
+                                                        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--olive)', letterSpacing: '0.15em', marginBottom: '0.5rem' }}>INTEREST RATE</div>
+                                                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--blue-trust)' }}>{decision.financialTerms.interestRate} <span style={{ fontSize: '0.9rem', opacity: 0.6 }}>p.a.</span></div>
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--olive)', letterSpacing: '0.15em', marginBottom: '0.5rem' }}>PROCESSING</div>
+                                                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--blue-trust)' }}>{decision.financialTerms.processingFee}</div>
+                                                    </div>
+                                                    <div style={{ gridColumn: 'span 2' }}>
+                                                        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--olive)', letterSpacing: '0.15em', marginBottom: '0.5rem' }}>ESTIMATED DISBURSAL</div>
+                                                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--blue-trust)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                            <Activity size={20} className="text-gold" /> {decision.financialTerms.disbursalTime}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div style={{ padding: '2rem', background: 'rgba(215, 87, 87, 0.05)', borderRadius: '16px', color: 'var(--terracotta)', fontWeight: 600, marginBottom: '3rem' }}>
+                                                {decision.financialTerms.reason}
+                                            </div>
+                                        )}
+
                                         <button
                                             className="btn btn-primary"
-                                            style={{ flex: 2, padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                                            onClick={handleSubmit}
-                                            disabled={isProcessing}
+                                            style={{ width: '100%', padding: '1.25rem', fontSize: '1rem', fontWeight: 800 }}
+                                            onClick={onClose}
                                         >
-                                            {isProcessing ? <><Loader2 className="animate-spin" size={20} /> Processing...</> : 'Submit Application'}
+                                            SYNC DASHBOARD
                                         </button>
                                     </div>
-                                </>
-                            )}
-                        </motion.div>
-                    )}
+                                ) : (
+                                    <>
+                                        <div style={{ marginBottom: '2.5rem' }}>
+                                            <h3 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Final <span className="text-gold">Verification</span> Audit</h3>
+                                            <p style={{ color: 'var(--olive)', fontWeight: 500 }}>Confirm parameters before submitting to corporate ledger.</p>
+                                        </div>
+
+                                        <div style={{ background: 'var(--blue-trust)', borderRadius: '24px', padding: '3rem', color: 'var(--sand)', marginBottom: '3rem', position: 'relative', overflow: 'hidden' }}>
+                                            <div style={{ position: 'absolute', top: '-10%', right: '-5%', opacity: 0.05 }}>
+                                                <Scale size={200} />
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem', position: 'relative', zIndex: 1 }}>
+                                                <div>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.6, letterSpacing: '0.2em', marginBottom: '0.5rem' }}>BENEFICIARY NODE</div>
+                                                    <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{selectedBank?.name}</div>
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.6, letterSpacing: '0.2em', marginBottom: '0.5rem' }}>SCHEDULED TENURE</div>
+                                                    <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{tenure} MONTHS</div>
+                                                </div>
+                                                <div style={{ gridColumn: 'span 2', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.6, letterSpacing: '0.2em', marginBottom: '0.5rem' }}>TOTAL PRINCIPAL LIQUIDITY</div>
+                                                    <div style={{ fontSize: '3rem', fontWeight: 400, fontFamily: 'var(--font-heading)', color: 'var(--gold)' }}>₹{parseInt(amount).toLocaleString()}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', padding: '1.5rem', background: 'var(--sand-light)', borderRadius: '16px', marginBottom: '3rem' }}>
+                                            <Lock size={18} className="text-olive" style={{ marginTop: '0.25rem' }} />
+                                            <p style={{ fontSize: '0.85rem', color: 'var(--olive)', fontWeight: 500, margin: 0 }}>
+                                                Submission authorizes <span style={{ fontWeight: 800 }}>{selectedBank?.name}</span> to access your institutional profile and proof-of-production for credit risk synthesis.
+                                            </p>
+                                        </div>
+
+                                        {error && (
+                                            <div style={{
+                                                marginBottom: '2rem', padding: '1.25rem',
+                                                background: 'rgba(215, 87, 87, 0.05)', borderRadius: '12px',
+                                                display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--terracotta)', fontWeight: 600
+                                            }}>
+                                                <AlertCircle size={20} />
+                                                <span style={{ fontSize: '0.9rem' }}>{error}</span>
+                                            </div>
+                                        )}
+
+                                        <div style={{ display: 'flex', gap: '1.5rem' }}>
+                                            <button className="btn-secondary" style={{ flex: 1, background: 'transparent', border: '1px solid var(--border-light)', fontWeight: 800, cursor: 'pointer' }} onClick={handleBack} disabled={isProcessing}>BACK</button>
+                                            <button
+                                                className="btn btn-primary"
+                                                style={{ flex: 2, padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', fontSize: '1rem', fontWeight: 800 }}
+                                                onClick={handleSubmit}
+                                                disabled={isProcessing}
+                                            >
+                                                {isProcessing ? <><Loader2 className="animate-spin" size={20} /> ANALYZING RISK...</> : 'COMMIT APPLICATION'}
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </motion.div>
         </div>

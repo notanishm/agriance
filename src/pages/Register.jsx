@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, AlertCircle, ArrowLeft, Sprout, Eye, EyeOff } from 'lucide-react';
+import { useTranslation } from '../contexts/LanguageContext';
+import { Mail, Lock, User, AlertCircle, ShieldCheck, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Register = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { signUp, signInWithGoogle, error: authError } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -16,8 +18,6 @@ const Register = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
 
   const handleChange = (e) => {
@@ -31,472 +31,254 @@ const Register = () => {
       setError('Please fill in all fields');
       return false;
     }
-    
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters');
       return false;
     }
-    
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return false;
     }
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address');
-      return false;
-    }
-    
     return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
-      const { data, error } = await signUp(formData.email, formData.password, {
+      const { error } = await signUp(formData.email, formData.password, {
         full_name: formData.fullName,
       });
-      
       if (error) {
         setError(error);
         return;
       }
-      
-      setSuccessMessage('Account created successfully! Please check your email to verify your account.');
-      
-      // Clear form
-      setFormData({
-        email: '',
-        password: '',
-        confirmPassword: '',
-        fullName: '',
-      });
-      
+      setSuccessMessage(t('register.success_subtitle'));
     } catch (err) {
-      setError(err.message || 'Failed to create account');
+      setError(err.message || 'Failed to initialize account');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignUp = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const { error } = await signInWithGoogle();
-      
-      if (error) {
-        setError(error);
-      }
-      // Google OAuth will redirect, so no success message needed
-    } catch (err) {
-      setError(err.message || 'Failed to sign up with Google');
-      setLoading(false);
-    }
-  };
-
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'var(--bg-main)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem'
-    }}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        style={{
-          width: '100%',
-          maxWidth: '480px',
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: '24px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Header */}
-        <div style={{ 
-          background: 'var(--primary)', 
-          padding: '2.5rem 2rem',
-          textAlign: 'center',
-          color: 'white'
-        }}>
+    <div className="mobile-stack" style={{ minHeight: '100vh', display: 'flex', backgroundColor: 'var(--white)' }}>
+      {/* Left Side */}
+      <div className="agri-pattern mobile-hide" style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: 'clamp(2rem, 5vw, 4rem)',
+        backgroundColor: 'var(--sand)',
+        borderRight: '1px solid var(--border-light)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{ maxWidth: '480px', position: 'relative', zIndex: 10 }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit', marginBottom: '4rem' }}>
+            <div style={{ background: 'var(--forest)', color: 'var(--gold)', borderRadius: '12px', padding: '0.5rem', display: 'flex' }}>
+              <ShieldCheck size={28} />
+            </div>
+            <span style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', color: 'var(--forest)' }}>Agriance</span>
+          </Link>
+
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2 }}
-            style={{
-              width: '80px',
-              height: '80px',
-              background: 'rgba(255,255,255,0.2)',
-              borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.5rem'
-            }}
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            <Sprout size={40} />
+            <h2 style={{ fontSize: '3.5rem', marginBottom: '1.5rem', color: 'var(--forest)', lineHeight: 1.1 }}>
+              {t('register.heading')} <span className="text-gold" style={{ fontStyle: 'italic' }}>{t('register.heading_accent')}</span>
+            </h2>
+            <p style={{ fontSize: '1.2rem', color: 'var(--olive)', marginBottom: '3rem', lineHeight: 1.6 }}>
+              {t('register.subtitle')}
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {[
+                t('register.feature1'),
+                t('register.feature2'),
+                t('register.feature3'),
+                t('register.feature4')
+              ].map((text, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--forest)', fontSize: '1.05rem', fontWeight: 600 }}>
+                  <CheckCircle2 size={20} className="text-gold" />
+                  {text}
+                </div>
+              ))}
+            </div>
           </motion.div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Create Account</h1>
-          <p style={{ opacity: 0.9 }}>Join Agriance and connect with farmers, businesses, and banks</p>
         </div>
+      </div>
 
-        {/* Form */}
-        <div style={{ padding: '2.5rem 2rem' }}>
-          {/* Back Link */}
-          <button
-            onClick={() => navigate('/')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              marginBottom: '1.5rem',
-              fontSize: '0.9rem'
-            }}
-          >
-            <ArrowLeft size={18} /> Back to Home
-          </button>
-
-          {/* Error Message */}
-          {(error || authError) && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '12px',
-                padding: '1rem',
-                marginBottom: '1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                color: '#dc2626'
-              }}
-            >
-              <AlertCircle size={20} />
-              <span style={{ fontSize: '0.9rem' }}>{error || authError}</span>
-            </motion.div>
-          )}
-
-          {/* Success Message */}
-          {successMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                background: '#f0fdf4',
-                border: '1px solid #86efac',
-                borderRadius: '12px',
-                padding: '1rem',
-                marginBottom: '1.5rem',
-                color: '#166534'
-              }}
-            >
-              <p style={{ fontSize: '0.9rem', margin: 0 }}>{successMessage}</p>
-            </motion.div>
-          )}
-
-          {/* Google Sign Up Button */}
-          <button
-            onClick={handleGoogleSignUp}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '1rem',
-              background: 'white',
-              border: '2px solid #e5e7eb',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.75rem',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '1rem',
-              fontWeight: 600,
-              color: '#374151',
-              marginBottom: '1.5rem',
-              opacity: loading ? 0.7 : 1,
-              transition: 'all 0.2s'
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            Continue with Google
-          </button>
-
-          {/* Divider */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '1rem',
-            marginBottom: '1.5rem',
-            color: 'var(--text-muted)',
-            fontSize: '0.85rem'
-          }}>
-            <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }}></div>
-            <span>or sign up with email</span>
-            <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }}></div>
-          </div>
-
-          {/* Registration Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {/* Full Name */}
-            <div>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: '0.5rem', 
-                fontWeight: 600,
-                fontSize: '0.9rem'
-              }}>
-                Full Name
-              </label>
-              <div style={{ position: 'relative' }}>
-                <User style={{ 
-                  position: 'absolute', 
-                  left: '1rem', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)'
-                }} size={20} />
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="Enter your full name"
-                  style={{
-                    width: '100%',
-                    padding: '1rem 1rem 1rem 3rem',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '12px',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  required
-                />
+      {/* Right Side */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 'clamp(1.5rem, 5vw, 2.5rem)',
+        backgroundColor: 'var(--white)'
+      }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ width: '100%', maxWidth: '480px' }}
+        >
+          <div style={{ marginBottom: '2.5rem' }}>
+            {/* Mobile Logo */}
+            <Link to="/" style={{ display: 'none', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit', marginBottom: '2rem' }} className="mobile-show">
+              <div style={{ background: 'var(--forest)', color: 'var(--gold)', borderRadius: '8px', padding: '0.4rem', display: 'flex' }}>
+                <ShieldCheck size={20} />
               </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: '0.5rem', 
-                fontWeight: 600,
-                fontSize: '0.9rem'
-              }}>
-                Email Address
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Mail style={{ 
-                  position: 'absolute', 
-                  left: '1rem', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)'
-                }} size={20} />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  style={{
-                    width: '100%',
-                    padding: '1rem 1rem 1rem 3rem',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '12px',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: '0.5rem', 
-                fontWeight: 600,
-                fontSize: '0.9rem'
-              }}>
-                Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock style={{ 
-                  position: 'absolute', 
-                  left: '1rem', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)'
-                }} size={20} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Create a password (min 6 characters)"
-                  style={{
-                    width: '100%',
-                    padding: '1rem 3rem 1rem 3rem',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '12px',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  required
-                  minLength={6}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '1rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: 'var(--text-muted)'
-                  }}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: '0.5rem', 
-                fontWeight: 600,
-                fontSize: '0.9rem'
-              }}>
-                Confirm Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock style={{ 
-                  position: 'absolute', 
-                  left: '1rem', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)'
-                }} size={20} />
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm your password"
-                  style={{
-                    width: '100%',
-                    padding: '1rem 3rem 1rem 3rem',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '12px',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '1rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: 'var(--text-muted)'
-                  }}
-                >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                background: loading ? '#9ca3af' : 'var(--primary)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '1rem',
-                fontWeight: 700,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                marginTop: '0.5rem',
-                transition: 'all 0.2s'
-              }}
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </button>
-          </form>
-
-          {/* Login Link */}
-          <div style={{ 
-            textAlign: 'center', 
-            marginTop: '1.5rem',
-            color: 'var(--text-muted)',
-            fontSize: '0.9rem'
-          }}>
-            Already have an account?{' '}
-            <Link 
-              to="/login" 
-              style={{ 
-                color: 'var(--primary)', 
-                fontWeight: 700,
-                textDecoration: 'none'
-              }}
-            >
-              Sign in
+              <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', color: 'var(--forest)' }}>Agriance</span>
             </Link>
+
+            <h1 style={{ fontSize: 'clamp(2rem, 5vw, 2.5rem)', marginBottom: '0.5rem', color: 'var(--forest)' }}>{t('register.submit')}</h1>
+            <p style={{ color: 'var(--olive)' }}>{t('register.subtitle')}</p>
           </div>
-        </div>
-      </motion.div>
+
+          {successMessage ? (
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              style={{
+                padding: '3rem 2rem',
+                textAlign: 'center',
+                backgroundColor: 'rgba(14, 46, 33, 0.03)',
+                borderRadius: '24px',
+                border: '1px solid var(--gold-glow)'
+              }}
+            >
+              <div style={{ backgroundColor: 'var(--gold)', color: 'var(--forest)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                <ShieldCheck size={32} />
+              </div>
+              <h3 style={{ marginBottom: '1rem', color: 'var(--forest)' }}>{t('register.success_heading')}</h3>
+              <p style={{ color: 'var(--olive)', marginBottom: '2rem' }}>{successMessage}</p>
+              <Link to="/login" className="btn btn-primary" style={{ width: '100%', borderRadius: '12px' }}>{t('login.submit')}</Link>
+            </motion.div>
+          ) : (
+            <>
+              {(error || authError) && (
+                <div style={{
+                  backgroundColor: 'rgba(163, 92, 79, 0.1)',
+                  color: 'var(--terracotta)',
+                  padding: '1rem',
+                  borderRadius: '12px',
+                  marginBottom: '1.5rem',
+                  border: '1px solid rgba(163, 92, 79, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  fontSize: '0.9rem'
+                }}>
+                  <AlertCircle size={18} />
+                  {error || authError}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--forest)', paddingLeft: '4px' }}>{t('register.name_label')}</label>
+                  <div style={{ position: 'relative' }}>
+                    <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--olive)' }} />
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      placeholder={t('register.name_placeholder')}
+                      style={{ paddingLeft: '3rem', height: '52px', borderRadius: '10px' }}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--forest)', paddingLeft: '4px' }}>{t('register.email_label')}</label>
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--olive)' }} />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder={t('register.email_placeholder')}
+                      style={{ paddingLeft: '3rem', height: '52px', borderRadius: '10px' }}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--forest)', paddingLeft: '4px' }}>{t('register.password_label')}</label>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--olive)' }} />
+                      <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        style={{ paddingLeft: '3rem', height: '52px', borderRadius: '10px' }}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--forest)', paddingLeft: '4px' }}>{t('register.confirm_password_label')}</label>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--olive)' }} />
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        style={{ paddingLeft: '3rem', height: '52px', borderRadius: '10px' }}
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={loading}
+                  style={{ width: '100%', height: '56px', borderRadius: '12px', fontSize: '1.05rem', marginTop: '1rem' }}
+                >
+                  {loading ? '...' : t('register.submit')} <ArrowRight size={20} />
+                </button>
+              </form>
+
+              <div style={{ margin: '2rem 0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-light)' }}></div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--olive)', fontWeight: 700 }}>{t('common.or') || 'OR'}</span>
+                <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-light)' }}></div>
+              </div>
+
+              <button
+                onClick={signInWithGoogle}
+                className="btn btn-secondary"
+                style={{ width: '100%', gap: '0.75rem', borderRadius: '12px', height: '52px' }}
+              >
+                {t('login.google_login')}
+              </button>
+
+              <p style={{ textAlign: 'center', marginTop: '2.5rem', color: 'var(--olive)', fontSize: '0.9rem' }}>
+                {t('register.already_member')} <Link to="/login" style={{ color: 'var(--gold)', fontWeight: 800, textDecoration: 'none' }}>{t('register.login_link')}</Link>
+              </p>
+            </>
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 };

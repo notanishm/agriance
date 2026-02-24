@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { motion } from 'framer-motion';
-import { Bell, Wallet, FileCheck, Tractor, TrendingUp, ShieldCheck, Microscope, ThermometerSun, AlertCircle } from 'lucide-react';
+import {
+    Bell,
+    Wallet,
+    FileCheck,
+    Tractor,
+    TrendingUp,
+    ShieldCheck,
+    Microscope,
+    ThermometerSun,
+    AlertCircle,
+    ArrowRight,
+    Wheat,
+    Leaf
+} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { farmerService } from '../../services/database';
@@ -21,17 +34,15 @@ const FarmerDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             if (!user) return;
-            
+
             try {
                 setLoading(true);
                 setError(null);
 
-                // Fetch farmer contracts
                 const { data: contractsData, error: contractsError } = await farmerService.getFarmerContracts(user.id);
                 if (contractsError) throw contractsError;
                 setContracts(contractsData || []);
 
-                // Fetch farmer loans
                 const { data: loansData, error: loansError } = await farmerService.getFarmerLoans(user.id);
                 if (loansError) throw loansError;
                 setLoans(loansData || []);
@@ -40,7 +51,6 @@ const FarmerDashboard = () => {
                 const { data: postingsData, error: postingsError } = await farmerService.getAvailablePostings();
                 if (!postingsError) setPostings(postingsData || []);
 
-                // Fetch farmer profile
                 const { data: profileData, error: profileError } = await farmerService.getFarmerProfile(user.id);
                 if (profileError) throw profileError;
                 setProfile(profileData);
@@ -56,35 +66,32 @@ const FarmerDashboard = () => {
         fetchData();
     }, [user]);
 
-    // Calculate stats from real data
     const activeContractsCount = contracts.filter(c => c.status === 'active' || c.status === 'in_progress').length;
     const pendingOffersCount = contracts.filter(c => c.status === 'pending').length;
     const totalEarnings = contracts
         .filter(c => c.status === 'completed')
         .reduce((sum, c) => sum + (c.total_value || 0), 0);
-    
-    // Calculate profile completion - only check fields that exist in profile
+
     const profileFields = [
         { key: 'full_name', label: t('profile.fullName'), value: profile?.full_name },
         { key: 'phone_number', label: t('profile.phone'), value: profile?.phone_number },
     ].filter(f => f.value !== undefined);
     const completedFields = profileFields.filter(f => f.value).length;
     const completionPercent = profileFields.length > 0 ? Math.round((completedFields / profileFields.length) * 100) : 100;
-    const missingFields = profileFields.filter(f => !f.value).map(f => f.label);
 
     const stats = [
-        { label: t('dashboard.activeContracts'), value: activeContractsCount.toString(), icon: <FileCheck color="var(--primary)" /> },
-        { label: t('dashboard.pendingOffers'), value: pendingOffersCount.toString(), icon: <Bell color="#B8860B" /> },
-        { label: t('dashboard.totalEarnings'), value: `₹${(totalEarnings / 100000).toFixed(1)}L`, icon: <Wallet color="var(--success)" /> },
-        { label: t('dashboard.upcomingHarvest'), value: '15 Days', icon: <Tractor color="#4A8B3F" /> }
+        { label: 'Active Contracts', value: activeContractsCount.toString(), icon: <FileCheck color="var(--primary)" /> },
+        { label: 'Pending Offers', value: pendingOffersCount.toString(), icon: <Bell color="#B8860B" /> },
+        { label: 'Total Earnings', value: `₹${(totalEarnings / 100000).toFixed(1)}L`, icon: <Wallet color="var(--success)" /> },
+        { label: 'Upcoming Harvest', value: '15 Days', icon: <Tractor color="#4A8B3F" /> }
     ];
 
     if (loading) {
         return (
-            <div style={{ minHeight: '100vh', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ minHeight: '100vh', background: '#fcfdfa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
-                    <p style={{ color: 'var(--text-muted)' }}>{t('dashboard.loading')}</p>
+                    <p style={{ color: 'var(--text-muted)' }}>Loading your dashboard...</p>
                 </div>
             </div>
         );
@@ -92,24 +99,26 @@ const FarmerDashboard = () => {
 
     if (error) {
         return (
-            <div style={{ minHeight: '100vh', background: 'var(--bg-main)', padding: '3rem 4rem' }}>
-                <div className="card" style={{ padding: '2rem', maxWidth: '600px', margin: '2rem auto', border: '1px solid var(--error)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--error)', marginBottom: '1rem' }}>
+            <div style={{ minHeight: '100vh', background: '#fcfdfa', padding: '3rem 4rem' }}>
+                <div className="card" style={{ padding: '2rem', maxWidth: '600px', margin: '2rem auto', border: '1px solid #ef4444' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', marginBottom: '1rem' }}>
                         <AlertCircle size={24} />
-                        <h3 style={{ margin: 0 }}>{t('dashboard.errorLoading')}</h3>
+                        <h3 style={{ margin: 0 }}>Error Loading Dashboard</h3>
                     </div>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{error}</p>
-                    <button className="btn btn-primary" onClick={() => window.location.reload()}>{t('common.retry')}</button>
+                    <button className="btn btn-primary" onClick={() => window.location.reload()}>Retry</button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
+        <div style={{ minHeight: '100vh', background: '#fcfdfa' }}>
+            {/* Header section removed - using global Header */}
+
             <main style={{ padding: '3rem 4rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h1>{t('dashboard.welcomeBack')}, {profile?.full_name || user?.email || t('roles.farmer')}</h1>
+                    <h1>Welcome back, {profile?.full_name || user?.email || 'Farmer'}</h1>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         {profile?.kyc_status === 'verified' && (
                             <div style={{
@@ -118,11 +127,12 @@ const FarmerDashboard = () => {
                                 color: 'var(--success)', borderRadius: 'var(--radius-full)',
                                 fontSize: '0.85rem', fontWeight: 700
                             }}>
-                                <ShieldCheck size={16} /> {t('dashboard.kycVerified')}
+                                <ShieldCheck size={16} /> KYC Verified
                             </div>
                         )}
                     </div>
-                </div>
+                )}
+                </header>
 
                 {/* Stats Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
@@ -144,51 +154,9 @@ const FarmerDashboard = () => {
                     ))}
                 </div>
 
-                {/* Tabs */}
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
-                    <button
-                        onClick={() => setActiveTab('contracts')}
-                        style={{
-                            padding: '0.6rem 1.25rem',
-                            background: activeTab === 'contracts' ? 'var(--primary)' : 'transparent',
-                            color: activeTab === 'contracts' ? 'white' : 'var(--text-muted)',
-                            border: 'none',
-                            borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
-                            fontWeight: 600,
-                            fontSize: '0.9rem',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        {t('dashboard.myContracts')}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('postings')}
-                        style={{
-                            padding: '0.6rem 1.25rem',
-                            background: activeTab === 'postings' ? 'var(--primary)' : 'transparent',
-                            color: activeTab === 'postings' ? 'white' : 'var(--text-muted)',
-                            border: 'none',
-                            borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
-                            fontWeight: 600,
-                            fontSize: '0.9rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.4rem'
-                        }}
-                    >
-                        {t('dashboard.postings')}
-                        {postings.length > 0 && (
-                            <span style={{ background: 'var(--warning)', color: '#000', padding: '0.1rem 0.4rem', borderRadius: '10px', fontSize: '0.75rem' }}>
-                                {postings.length}
-                            </span>
-                        )}
-                    </button>
-                </div>
-
                 {completionPercent < 100 && (
-                    <div className="card" style={{ 
-                        padding: '1.5rem', 
+                    <div className="card" style={{
+                        padding: '1.5rem',
                         marginBottom: '2rem',
                         background: isDark ? 'linear-gradient(135deg, #451a03 0%, #78350f 100%)' : 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
                         border: '1px solid #fed7aa'
@@ -199,13 +167,13 @@ const FarmerDashboard = () => {
                                     <AlertCircle size={24} />
                                 </div>
                                 <div>
-                                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: isDark ? '#fdba74' : '#9a3412' }}>{t('dashboard.completeProfile')} ({completionPercent}%)</h3>
+                                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: isDark ? '#fdba74' : '#9a3412' }}>Complete your profile ({completionPercent}%)</h3>
                                     <p style={{ margin: '0.25rem 0 0', color: isDark ? '#fed7aa' : '#c2410c', fontSize: '0.9rem' }}>
-                                        {t('dashboard.missing')}: {missingFields.join(', ')}
+                                        Missing: {missingFields.join(', ')}
                                     </p>
                                 </div>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => window.location.href = '/farmer/register'}
                                 style={{
                                     padding: '0.75rem 1.5rem',
@@ -217,179 +185,150 @@ const FarmerDashboard = () => {
                                     fontWeight: 600
                                 }}
                             >
-                                {t('dashboard.completeProfile')}
+                                Complete Profile
                             </button>
                         </div>
                     </div>
                 )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
-                    {activeTab === 'contracts' && (
+                    {/* Active Contracts */}
                     <section>
                         <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <FileCheck size={24} color="var(--primary)" /> {t('dashboard.activeContracts')}
+                            <FileCheck size={24} color="var(--primary)" /> Active Contracts
                         </h2>
                         {contracts.length === 0 ? (
                             <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
                                 <FileCheck size={48} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
-                                <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>{t('dashboard.noContracts')}</h3>
+                                <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>No Active Contracts</h3>
                                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                    {t('dashboard.exploreMarketplace')}
+                                    Start by exploring contract opportunities in the marketplace
                                 </p>
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 {contracts.map(contract => {
-                                    const statusDisplay = contract.status === 'active' || contract.status === 'in_progress' ? t('dashboard.inProgress') : 
-                                                         contract.status === 'pending' ? t('dashboard.verification') :
-                                                         contract.status === 'completed' ? t('dashboard.completed') : contract.status;
+                                    const statusDisplay = contract.status === 'active' || contract.status === 'in_progress' ? 'In Progress' :
+                                        contract.status === 'pending' ? 'Verification' :
+                                            contract.status === 'completed' ? 'Completed' : contract.status;
                                     const progress = contract.progress || (contract.status === 'completed' ? 100 : 50);
-                                    
+
                                     return (
                                         <div key={contract.id} className="card" style={{ padding: '2rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                                                 <div>
-                                                    <h3 style={{ fontSize: '1.25rem' }}>{contract.business_name || t('dashboard.businessContract')}</h3>
+                                                    <h3 style={{ fontSize: '1.25rem' }}>{contract.business_name || 'Business Contract'}</h3>
                                                     <p style={{ color: 'var(--text-muted)' }}>
-                                                        {contract.crop_name} • {contract.quantity} {t('dashboard.quintals')}
+                                                        {contract.crop_name} • {contract.quantity} Quintals
                                                     </p>
                                                 </div>
                                                 <div style={{ textAlign: 'right' }}>
                                                     <span style={{
                                                         padding: '0.4rem 1rem',
                                                         borderRadius: 'var(--radius-full)',
-                                                        background: statusDisplay === t('dashboard.inProgress') ? 'rgba(16, 185, 129, 0.1)' : 'rgba(212, 175, 55, 0.1)',
-                                                        color: statusDisplay === t('dashboard.inProgress') ? 'var(--success)' : '#B8860B',
+                                                        background: statusDisplay === 'In Progress' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(212, 175, 55, 0.1)',
+                                                        color: statusDisplay === 'In Progress' ? 'var(--success)' : '#B8860B',
                                                         fontSize: '0.8rem',
                                                         fontWeight: 700
                                                     }}>
                                                         {statusDisplay}
                                                     </span>
                                                     <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                                        {t('dashboard.value')}: ₹{contract.total_value?.toLocaleString() || '0'}
+                                                        Value: ₹{contract.total_value?.toLocaleString() || '0'}
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                                <span>{t('dashboard.growthProgress')}</span>
+                                                <span>Growth Progress</span>
                                                 <span style={{ fontWeight: 600 }}>{progress}%</span>
                                             </div>
-                                            <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+                                            <div style={{ height: '12px', background: 'var(--sand-light)', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
                                                 <motion.div
                                                     initial={{ width: 0 }}
-                                                    animate={{ width: `${progress}%` }}
-                                                    style={{ height: '100%', background: 'var(--primary)' }}
+                                                    animate={{ width: `${contract.progress || 65}%` }}
+                                                    style={{ height: '100%', background: 'var(--gold)', boxShadow: '0 0 10px var(--gold-glow)' }}
                                                 />
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </section>
-                    )}
-
-                    {activeTab === 'postings' && (
-                    <section>
-                        <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <FileCheck size={24} color="var(--primary)" /> {t('dashboard.postings')}
-                        </h2>
-                        {postings.length === 0 ? (
-                            <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
-                                <FileCheck size={48} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
-                                <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>{t('dashboard.noPostings')}</h3>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                    {t('dashboard.checkBackLater')}
-                                </p>
-                            </div>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {postings.map(posting => (
-                                    <div key={posting.id} className="card" style={{ padding: '1.5rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                            <div>
-                                                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{posting.business?.business_name || 'Business'}</h3>
-                                                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{posting.crop_name}</p>
-                                            </div>
-                                            <div style={{ textAlign: 'right' }}>
-                                                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>₹{posting.price}/Q</div>
-                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{posting.quantity} {posting.unit}</div>
-                                            </div>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                                {posting.delivery_date}
-                                            </span>
-                                            <button className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
-                                                {t('dashboard.apply')}
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </section>
-                    )}
-
-                    {/* Sidebar */}
-                    <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-
-
-                        {/* Market Insights */}
-                        <section>
-                            <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                Market Insights
-                            </h2>
-                            <div className="card" style={{ background: 'var(--primary)', color: 'white', padding: '2rem' }}>
-                                <TrendingUp style={{ marginBottom: '1rem' }} />
-                                <h3 style={{ marginBottom: '0.5rem' }}>Wheat Demand is Up!</h3>
-                                <p style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '1.5rem' }}>
-                                    Businesses are looking for Premium Organic Wheat in your region. Contracts offering 15% better prices.
-                                </p>
-                                <button className="btn" style={{ background: 'white', color: 'var(--primary)', width: '100%' }}>View Offers</button>
-                            </div>
-                        </section>
-
-                        {/* Quality & Growth Monitoring */}
-                        <section>
-                            <div className="card" style={{ padding: '1.5rem', border: '1px solid rgba(45, 90, 39, 0.1)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 700 }}>
-                                        <Microscope size={18} /> {t('quality.title')}
-                                    </div>
-                                    <ThermometerSun size={18} color="#B8860B" />
-                                </div>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-                                    {t('quality.desc')}
-                                </p>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
-                                    <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>{t('quality.estimate')}</div>
-                                        <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>8.5 Quintals / Acre</div>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('quality.moisture')}</div>
-                                            <div style={{ fontSize: '1rem', fontWeight: 600 }}>12.4%</div>
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('quality.health')}</div>
-                                            <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--success)' }}>Optimal</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.85rem' }}>
-                                    {t('quality.viewReport')}
-                                </button>
-                            </div>
-                        </section>
-                    </aside>
+                                    </motion.div>
+                        ))}
                 </div>
-            </main>
+                        )}
+            </section>
 
+            {/* Sidebar */}
+            <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                {/* Market Trends Card */}
+                <div className="card card-farmer" style={{ padding: '2rem', background: 'var(--forest)', color: 'var(--sand)', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                            <TrendingUp className="text-gold" />
+                            <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em' }}>LOCAL ALERTS</span>
+                        </div>
+                        <h3 style={{ color: 'var(--white)', marginBottom: '1rem', fontSize: '1.75rem' }}>Wheat Demand Spike</h3>
+                        <p style={{ fontSize: '1rem', opacity: 0.9, marginBottom: '2rem', lineHeight: 1.6 }}>
+                            Verified buyers in your region are offering 12% above MSP for Organic Wheat.
+                        </p>
+                        <button className="btn btn-primary" style={{ width: '100%' }}>Scan Offers</button>
+                    </div>
+                    {/* Decorative Pattern overlay */}
+                    <div style={{ position: 'absolute', bottom: '-20px', right: '-20px', opacity: 0.1 }}>
+                        <Wheat size={160} />
+                    </div>
+                </div>
 
+                {/* Quality Monitoring Card */}
+                <div className="card card-farmer" style={{ padding: '2rem', background: 'white' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <Microscope className="text-gold" size={24} />
+                            <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--olive)' }}>FIELD ANALYSIS</span>
+                        </div>
+                        <ThermometerSun size={20} className="text-risk" />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div style={{ background: 'var(--sand-light)', padding: '1.5rem', borderRadius: '16px' }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--olive)', marginBottom: '0.5rem' }}>Estimated Yield</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 400, fontFamily: 'var(--font-heading)' }}>8.5 <span style={{ fontSize: '1rem' }}>qtl/acre</span></div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div style={{ padding: '1rem', border: '1px solid var(--border-light)', borderRadius: '12px' }}>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--olive)', marginBottom: '0.25rem' }}>Moisture</div>
+                                <div style={{ fontWeight: 700 }}>12.4%</div>
+                            </div>
+                            <div style={{ padding: '1rem', border: '1px solid var(--border-light)', borderRadius: '12px' }}>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--olive)', marginBottom: '0.25rem' }}>Health Status</div>
+                                <div style={{ fontWeight: 700, color: 'var(--olive)' }}>OPTIMAL</div>
+                            </div>
+                        </div>
+
+                        <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.9rem' }}>Full Quality Report</button>
+                    </div>
+                </div>
+
+                {/* Completion Card */}
+                {completionPercent < 100 && (
+                    <div className="card card-farmer" style={{
+                        padding: '1.5rem',
+                        background: 'var(--sand-light)',
+                        border: '1px dashed var(--gold)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                            <AlertCircle size={24} className="text-gold" />
+                            <span style={{ fontWeight: 700, color: 'var(--forest)' }}>Complete Profile ({completionPercent}%)</span>
+                        </div>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--olive)', marginBottom: '1.25rem' }}>
+                            Verified profiles get priority access to lower interest loans.
+                        </p>
+                        <button onClick={() => navigate('/farmer/register')} className="btn btn-primary" style={{ width: '100%', padding: '0.6rem', fontSize: '0.85rem' }}>Finalize Vault</button>
+                    </div>
+                )}
+            </aside>
         </div>
+        </div >
     );
 };
 
