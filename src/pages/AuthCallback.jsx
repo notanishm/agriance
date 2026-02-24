@@ -30,23 +30,24 @@ const AuthCallback = () => {
           
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          try {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('role, onboarding_completed')
-              .eq('id', session.user.id)
-              .single();
-            
-            if (!profile) {
-              setTimeout(() => navigate('/roles'), 1500);
-            } else if (!profile.onboarding_completed) {
-              setTimeout(() => navigate(`/${profile.role}/register`), 1500);
-            } else {
-              setTimeout(() => navigate(`/${profile.role}/dashboard`), 1500);
-            }
-          } catch (err) {
-            console.log('Profile query failed, redirecting to roles');
+          // Try to get profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role, onboarding_completed')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          
+          console.log('Profile data:', profile);
+          
+          if (!profile) {
+            // No profile - go to role selection
             setTimeout(() => navigate('/roles'), 1500);
+          } else if (!profile.onboarding_completed) {
+            // Has profile but incomplete - go to onboarding
+            setTimeout(() => navigate(`/${profile.role}/register`), 1500);
+          } else {
+            // Has profile and complete - go to dashboard
+            setTimeout(() => navigate(`/${profile.role}/dashboard`), 1500);
           }
         } else if (isMounted) {
           // Listen for auth changes
@@ -59,22 +60,18 @@ const AuthCallback = () => {
               
               await new Promise(resolve => setTimeout(resolve, 500));
               
-              try {
-                const { data: profile } = await supabase
-                  .from('profiles')
-                  .select('role, onboarding_completed')
-                  .eq('id', session.user.id)
-                  .single();
-                
-                if (!profile) {
-                  setTimeout(() => navigate('/roles'), 1500);
-                } else if (!profile.onboarding_completed) {
-                  setTimeout(() => navigate(`/${profile.role}/register`), 1500);
-                } else {
-                  setTimeout(() => navigate(`/${profile.role}/dashboard`), 1500);
-                }
-              } catch (err) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('role, onboarding_completed')
+                .eq('id', session.user.id)
+                .maybeSingle();
+              
+              if (!profile) {
                 setTimeout(() => navigate('/roles'), 1500);
+              } else if (!profile.onboarding_completed) {
+                setTimeout(() => navigate(`/${profile.role}/register`), 1500);
+              } else {
+                setTimeout(() => navigate(`/${profile.role}/dashboard`), 1500);
               }
             }
           });
