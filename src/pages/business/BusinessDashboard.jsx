@@ -519,7 +519,7 @@ const BusinessDashboard = () => {
                         background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '2rem'
                     }}>
-                        <ContractFlow farmer={selectedFarmer} onComplete={() => { setShowContract(false); setSelectedFarmer(null); }} />
+                        <ContractFlow farmer={selectedFarmer} onClose={() => { setShowContract(false); setSelectedFarmer(null); }} onComplete={() => { setShowContract(false); setSelectedFarmer(null); }} />
                     </div>
                 )}
             </AnimatePresence>

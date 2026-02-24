@@ -1,14 +1,24 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Shield, CreditCard, ChevronRight, Check, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { FileText, Shield, CreditCard, ChevronRight, Check, Loader2, RefreshCw, AlertCircle, X } from 'lucide-react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { generateContractLocally } from '../../services/contractEngine';
 import ContractDisplay from '../../components/ContractDisplay';
 import { useAuth } from '../../contexts/AuthContext';
 import { businessService } from '../../services/database';
 
-const ContractFlow = ({ farmer, onComplete }) => {
+const ContractFlow = ({ farmer, onComplete, onClose }) => {
     const { user } = useAuth();
+    const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
+    
+    React.useEffect(() => {
+        const checkDark = () => setIsDark(document.documentElement.classList.contains('dark'));
+        checkDark();
+        const observer = new MutationObserver(checkDark);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
+    
     const [step, setStep] = useState('form'); // form, generating, review, sign, pay, done
     const [loading, setLoading] = useState(false);
     const [contractContent, setContractContent] = useState('');
@@ -104,8 +114,32 @@ const ContractFlow = ({ farmer, onComplete }) => {
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)'
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+            position: 'relative'
         }}>
+            {onClose && (
+                <button
+                    onClick={onClose}
+                    style={{
+                        position: 'absolute',
+                        top: '1rem',
+                        right: '1rem',
+                        background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '36px',
+                        height: '36px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        zIndex: 10,
+                        color: isDark ? '#fff' : '#333'
+                    }}
+                >
+                    <X size={20} />
+                </button>
+            )}
             {step === 'form' && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
