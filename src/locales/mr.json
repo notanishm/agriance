@@ -18,7 +18,34 @@
     "back": "मागे",
     "submit": "सबमिट करा",
     "login": "लॉगिन",
-    "register": "नोंदणी"
+    "register": "नोंदणी",
+    "retry": "पुन्हा प्रयत्न"
+  },
+  "profile": {
+    "fullName": "पूर्ण नाव",
+    "phone": "फोन नंबर"
+  },
+  "dashboard": {
+    "loading": "डॅशबोर्ड लोड होत आहे...",
+    "errorLoading": "डॅशबोर्ड लोड करताना त्रुटी",
+    "welcomeBack": "पुन्हा स्वागत आहे",
+    "kycVerified": "KYC सत्यापित",
+    "activeContracts": "सक्रिय करार",
+    "pendingOffers": "प्रलंबित प्रस्ताव",
+    "totalEarnings": "एकूण कमाई",
+    "upcomingHarvest": "आगामी पीक",
+    "completeProfile": "तुमची प्रोफाइल पूर्ण करा",
+    "missing": "अपूर्ण",
+    "noContracts": "कोणतेही सक्रिय करार नाहीत",
+    "exploreMarketplace": "बाजारातील करार संधी शोधा",
+    "inProgress": "प्रगतीत",
+    "verification": "पडताळणी",
+    "completed": "पूर्ण",
+    "businessContract": "व्यापार करार",
+    "quintals": "क्विंटल",
+    "value": "मूल्य",
+    "growthProgress": "वाढ प्रगती",
+    "marketInsights": "बाजार अंतर्दृष्टी"
   },
   "bank": {
     "dashboard": "बँकर टर्मिनल",

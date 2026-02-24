@@ -20,7 +20,34 @@
     "back": "Back",
     "submit": "Submit",
     "login": "Login",
-    "register": "Register"
+    "register": "Register",
+    "retry": "Retry"
+  },
+  "profile": {
+    "fullName": "Full Name",
+    "phone": "Phone Number"
+  },
+  "dashboard": {
+    "loading": "Loading your dashboard...",
+    "errorLoading": "Error Loading Dashboard",
+    "welcomeBack": "Welcome back",
+    "kycVerified": "KYC Verified",
+    "activeContracts": "Active Contracts",
+    "pendingOffers": "Pending Offers",
+    "totalEarnings": "Total Earnings",
+    "upcomingHarvest": "Upcoming Harvest",
+    "completeProfile": "Complete your profile",
+    "missing": "Missing",
+    "noContracts": "No Active Contracts",
+    "exploreMarketplace": "Start by exploring contract opportunities in the marketplace",
+    "inProgress": "In Progress",
+    "verification": "Verification",
+    "completed": "Completed",
+    "businessContract": "Business Contract",
+    "quintals": "Quintals",
+    "value": "Value",
+    "growthProgress": "Growth Progress",
+    "marketInsights": "Market Insights"
   },
   "bank": {
     "dashboard": "Banker's Terminal",

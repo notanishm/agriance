@@ -59,26 +59,26 @@ const FarmerDashboard = () => {
     
     // Calculate profile completion - only check fields that exist in profile
     const profileFields = [
-        { key: 'full_name', label: 'Full Name', value: profile?.full_name },
-        { key: 'phone_number', label: 'Phone Number', value: profile?.phone_number },
+        { key: 'full_name', label: t('profile.fullName'), value: profile?.full_name },
+        { key: 'phone_number', label: t('profile.phone'), value: profile?.phone_number },
     ].filter(f => f.value !== undefined);
     const completedFields = profileFields.filter(f => f.value).length;
     const completionPercent = profileFields.length > 0 ? Math.round((completedFields / profileFields.length) * 100) : 100;
     const missingFields = profileFields.filter(f => !f.value).map(f => f.label);
 
     const stats = [
-        { label: 'Active Contracts', value: activeContractsCount.toString(), icon: <FileCheck color="var(--primary)" /> },
-        { label: 'Pending Offers', value: pendingOffersCount.toString(), icon: <Bell color="#B8860B" /> },
-        { label: 'Total Earnings', value: `₹${(totalEarnings / 100000).toFixed(1)}L`, icon: <Wallet color="var(--success)" /> },
-        { label: 'Upcoming Harvest', value: '15 Days', icon: <Tractor color="#4A8B3F" /> }
+        { label: t('dashboard.activeContracts'), value: activeContractsCount.toString(), icon: <FileCheck color="var(--primary)" /> },
+        { label: t('dashboard.pendingOffers'), value: pendingOffersCount.toString(), icon: <Bell color="#B8860B" /> },
+        { label: t('dashboard.totalEarnings'), value: `₹${(totalEarnings / 100000).toFixed(1)}L`, icon: <Wallet color="var(--success)" /> },
+        { label: t('dashboard.upcomingHarvest'), value: '15 Days', icon: <Tractor color="#4A8B3F" /> }
     ];
 
     if (loading) {
         return (
-            <div style={{ minHeight: '100vh', background: '#fcfdfa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ minHeight: '100vh', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
-                    <p style={{ color: 'var(--text-muted)' }}>Loading your dashboard...</p>
+                    <p style={{ color: 'var(--text-muted)' }}>{t('dashboard.loading')}</p>
                 </div>
             </div>
         );
@@ -86,26 +86,24 @@ const FarmerDashboard = () => {
 
     if (error) {
         return (
-            <div style={{ minHeight: '100vh', background: '#fcfdfa', padding: '3rem 4rem' }}>
-                <div className="card" style={{ padding: '2rem', maxWidth: '600px', margin: '2rem auto', border: '1px solid #ef4444' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', marginBottom: '1rem' }}>
+            <div style={{ minHeight: '100vh', background: 'var(--bg-main)', padding: '3rem 4rem' }}>
+                <div className="card" style={{ padding: '2rem', maxWidth: '600px', margin: '2rem auto', border: '1px solid var(--error)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--error)', marginBottom: '1rem' }}>
                         <AlertCircle size={24} />
-                        <h3 style={{ margin: 0 }}>Error Loading Dashboard</h3>
+                        <h3 style={{ margin: 0 }}>{t('dashboard.errorLoading')}</h3>
                     </div>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{error}</p>
-                    <button className="btn btn-primary" onClick={() => window.location.reload()}>Retry</button>
+                    <button className="btn btn-primary" onClick={() => window.location.reload()}>{t('common.retry')}</button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: '#fcfdfa' }}>
-            {/* Header section removed - using global Header */}
-
+        <div style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
             <main style={{ padding: '3rem 4rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h1>Welcome back, {profile?.full_name || user?.email || 'Farmer'}</h1>
+                    <h1>{t('dashboard.welcomeBack')}, {profile?.full_name || user?.email || t('roles.farmer')}</h1>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         {profile?.kyc_status === 'verified' && (
                             <div style={{
@@ -114,7 +112,7 @@ const FarmerDashboard = () => {
                                 color: 'var(--success)', borderRadius: 'var(--radius-full)',
                                 fontSize: '0.85rem', fontWeight: 700
                             }}>
-                                <ShieldCheck size={16} /> KYC Verified
+                                <ShieldCheck size={16} /> {t('dashboard.kycVerified')}
                             </div>
                         )}
                     </div>
@@ -153,9 +151,9 @@ const FarmerDashboard = () => {
                                     <AlertCircle size={24} />
                                 </div>
                                 <div>
-                                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: isDark ? '#fdba74' : '#9a3412' }}>Complete your profile ({completionPercent}%)</h3>
+                                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: isDark ? '#fdba74' : '#9a3412' }}>{t('dashboard.completeProfile')} ({completionPercent}%)</h3>
                                     <p style={{ margin: '0.25rem 0 0', color: isDark ? '#fed7aa' : '#c2410c', fontSize: '0.9rem' }}>
-                                        Missing: {missingFields.join(', ')}
+                                        {t('dashboard.missing')}: {missingFields.join(', ')}
                                     </p>
                                 </div>
                             </div>
@@ -171,62 +169,61 @@ const FarmerDashboard = () => {
                                     fontWeight: 600
                                 }}
                             >
-                                Complete Profile
+                                {t('dashboard.completeProfile')}
                             </button>
                         </div>
                     </div>
                 )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
-                    {/* Active Contracts */}
                     <section>
                         <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <FileCheck size={24} color="var(--primary)" /> Active Contracts
+                            <FileCheck size={24} color="var(--primary)" /> {t('dashboard.activeContracts')}
                         </h2>
                         {contracts.length === 0 ? (
                             <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
                                 <FileCheck size={48} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
-                                <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>No Active Contracts</h3>
+                                <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>{t('dashboard.noContracts')}</h3>
                                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                    Start by exploring contract opportunities in the marketplace
+                                    {t('dashboard.exploreMarketplace')}
                                 </p>
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 {contracts.map(contract => {
-                                    const statusDisplay = contract.status === 'active' || contract.status === 'in_progress' ? 'In Progress' : 
-                                                         contract.status === 'pending' ? 'Verification' :
-                                                         contract.status === 'completed' ? 'Completed' : contract.status;
+                                    const statusDisplay = contract.status === 'active' || contract.status === 'in_progress' ? t('dashboard.inProgress') : 
+                                                         contract.status === 'pending' ? t('dashboard.verification') :
+                                                         contract.status === 'completed' ? t('dashboard.completed') : contract.status;
                                     const progress = contract.progress || (contract.status === 'completed' ? 100 : 50);
                                     
                                     return (
                                         <div key={contract.id} className="card" style={{ padding: '2rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                                                 <div>
-                                                    <h3 style={{ fontSize: '1.25rem' }}>{contract.business_name || 'Business Contract'}</h3>
+                                                    <h3 style={{ fontSize: '1.25rem' }}>{contract.business_name || t('dashboard.businessContract')}</h3>
                                                     <p style={{ color: 'var(--text-muted)' }}>
-                                                        {contract.crop_name} • {contract.quantity} Quintals
+                                                        {contract.crop_name} • {contract.quantity} {t('dashboard.quintals')}
                                                     </p>
                                                 </div>
                                                 <div style={{ textAlign: 'right' }}>
                                                     <span style={{
                                                         padding: '0.4rem 1rem',
                                                         borderRadius: 'var(--radius-full)',
-                                                        background: statusDisplay === 'In Progress' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(212, 175, 55, 0.1)',
-                                                        color: statusDisplay === 'In Progress' ? 'var(--success)' : '#B8860B',
+                                                        background: statusDisplay === t('dashboard.inProgress') ? 'rgba(16, 185, 129, 0.1)' : 'rgba(212, 175, 55, 0.1)',
+                                                        color: statusDisplay === t('dashboard.inProgress') ? 'var(--success)' : '#B8860B',
                                                         fontSize: '0.8rem',
                                                         fontWeight: 700
                                                     }}>
                                                         {statusDisplay}
                                                     </span>
                                                     <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                                        Value: ₹{contract.total_value?.toLocaleString() || '0'}
+                                                        {t('dashboard.value')}: ₹{contract.total_value?.toLocaleString() || '0'}
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                                <span>Growth Progress</span>
+                                                <span>{t('dashboard.growthProgress')}</span>
                                                 <span style={{ fontWeight: 600 }}>{progress}%</span>
                                             </div>
                                             <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
