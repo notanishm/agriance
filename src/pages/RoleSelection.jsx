@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from '../contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { User, Building2, ChevronRight, Landmark } from 'lucide-react';
 
 const RoleSelection = () => {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const navigate = useNavigate();
 
-    const roles = [
+    const roles = useMemo(() => [
         {
             id: 'farmer',
             title: t('roles.farmer'),
@@ -33,7 +33,7 @@ const RoleSelection = () => {
             color: '#2563EB',
             path: '/bank/register'
         }
-    ];
+    ], [t]);
 
     return (
         <div className="agri-pattern" style={{

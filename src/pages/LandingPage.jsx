@@ -9,8 +9,9 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const handleLanguageSelect = (lang) => {
+    localStorage.setItem('lang', lang);
     setLanguage(lang);
-    navigate('/roles');
+    setTimeout(() => navigate('/roles'), 100);
   };
 
   return (
