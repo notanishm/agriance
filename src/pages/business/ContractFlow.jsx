@@ -86,7 +86,7 @@ const ContractFlow = ({ farmer, onComplete, onClose }) => {
                 price: parseFloat(formData.price),
                 total_value: totalValue,
                 delivery_date: formData.deliveryDate,
-                status: 'active',
+                status: 'pending',
                 contract_content: contractContent,
                 selected_clauses: selectedClauses
             });

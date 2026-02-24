@@ -47,7 +47,12 @@
     "quintals": "क्विंटल",
     "value": "मूल्य",
     "growthProgress": "विकास प्रगति",
-    "marketInsights": "बाज़ार अंतर्दृष्टि"
+    "marketInsights": "बाज़ार अंतर्दृष्टि",
+    "myContracts": "मेरे अनुबंध",
+    "postings": "आवश्यकताएं",
+    "noPostings": "कोई आवश्यकता उपलब्ध नहीं",
+    "checkBackLater": "नए अवसरों के लिए बाद में देखें",
+    "apply": "आवेदन करें"
   },
   "bank": {
     "dashboard": "बैंकर टर्मिनल",

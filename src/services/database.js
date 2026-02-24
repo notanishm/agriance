@@ -91,6 +91,31 @@ export const farmerService = {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
+      return { data: null, error: null };
+    }
+  },
+
+  // Get all available contract postings (for farmer marketplace)
+  async getAvailablePostings() {
+    try {
+      const { data, error } = await supabase
+        .from('contracts')
+        .select(`
+          *,
+          business:business_id (
+            id,
+            business_name,
+            business_gst,
+            phone_number,
+            location
+          )
+        `)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
       return { data: null, error: handleSupabaseError(error) };
     }
   },

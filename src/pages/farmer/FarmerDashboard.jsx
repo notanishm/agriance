@@ -12,9 +12,11 @@ const FarmerDashboard = () => {
     const { isDark } = useTheme();
     const [contracts, setContracts] = useState([]);
     const [loans, setLoans] = useState([]);
+    const [postings, setPostings] = useState([]);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activeTab, setActiveTab] = useState('contracts');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -33,6 +35,10 @@ const FarmerDashboard = () => {
                 const { data: loansData, error: loansError } = await farmerService.getFarmerLoans(user.id);
                 if (loansError) throw loansError;
                 setLoans(loansData || []);
+
+                // Fetch available postings
+                const { data: postingsData, error: postingsError } = await farmerService.getAvailablePostings();
+                if (!postingsError) setPostings(postingsData || []);
 
                 // Fetch farmer profile
                 const { data: profileData, error: profileError } = await farmerService.getFarmerProfile(user.id);
@@ -138,6 +144,48 @@ const FarmerDashboard = () => {
                     ))}
                 </div>
 
+                {/* Tabs */}
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
+                    <button
+                        onClick={() => setActiveTab('contracts')}
+                        style={{
+                            padding: '0.6rem 1.25rem',
+                            background: activeTab === 'contracts' ? 'var(--primary)' : 'transparent',
+                            color: activeTab === 'contracts' ? 'white' : 'var(--text-muted)',
+                            border: 'none',
+                            borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {t('dashboard.myContracts')}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('postings')}
+                        style={{
+                            padding: '0.6rem 1.25rem',
+                            background: activeTab === 'postings' ? 'var(--primary)' : 'transparent',
+                            color: activeTab === 'postings' ? 'white' : 'var(--text-muted)',
+                            border: 'none',
+                            borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem'
+                        }}
+                    >
+                        {t('dashboard.postings')}
+                        {postings.length > 0 && (
+                            <span style={{ background: 'var(--warning)', color: '#000', padding: '0.1rem 0.4rem', borderRadius: '10px', fontSize: '0.75rem' }}>
+                                {postings.length}
+                            </span>
+                        )}
+                    </button>
+                </div>
+
                 {completionPercent < 100 && (
                     <div className="card" style={{ 
                         padding: '1.5rem', 
@@ -176,6 +224,7 @@ const FarmerDashboard = () => {
                 )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
+                    {activeTab === 'contracts' && (
                     <section>
                         <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <FileCheck size={24} color="var(--primary)" /> {t('dashboard.activeContracts')}
@@ -239,6 +288,49 @@ const FarmerDashboard = () => {
                             </div>
                         )}
                     </section>
+                    )}
+
+                    {activeTab === 'postings' && (
+                    <section>
+                        <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FileCheck size={24} color="var(--primary)" /> {t('dashboard.postings')}
+                        </h2>
+                        {postings.length === 0 ? (
+                            <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
+                                <FileCheck size={48} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
+                                <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>{t('dashboard.noPostings')}</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                    {t('dashboard.checkBackLater')}
+                                </p>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {postings.map(posting => (
+                                    <div key={posting.id} className="card" style={{ padding: '1.5rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                            <div>
+                                                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{posting.business?.business_name || 'Business'}</h3>
+                                                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{posting.crop_name}</p>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>₹{posting.price}/Q</div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{posting.quantity} {posting.unit}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                                {posting.delivery_date}
+                                            </span>
+                                            <button className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+                                                {t('dashboard.apply')}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </section>
+                    )}
 
                     {/* Sidebar */}
                     <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

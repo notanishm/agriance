@@ -47,7 +47,12 @@
     "quintals": "Quintals",
     "value": "Value",
     "growthProgress": "Growth Progress",
-    "marketInsights": "Market Insights"
+    "marketInsights": "Market Insights",
+    "myContracts": "My Contracts",
+    "postings": "Requirements",
+    "noPostings": "No Requirements Available",
+    "checkBackLater": "Check back later for new opportunities",
+    "apply": "Apply"
   },
   "bank": {
     "dashboard": "Banker's Terminal",
