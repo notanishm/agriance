@@ -248,8 +248,7 @@ export const AuthProvider = ({ children }) => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://agriance.vercel.app/auth/callback',
-          scopes: 'email profile openid',
+          redirectTo: window.location.origin + '/auth/callback',
         },
       });
 
