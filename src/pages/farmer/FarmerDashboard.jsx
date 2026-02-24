@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     Bell,
@@ -23,6 +24,7 @@ const FarmerDashboard = () => {
     const { t } = useTranslation();
     const { user } = useAuth();
     const { isDark } = useTheme();
+    const navigate = useNavigate();
     const [contracts, setContracts] = useState([]);
     const [loans, setLoans] = useState([]);
     const [postings, setPostings] = useState([]);
@@ -75,7 +77,15 @@ const FarmerDashboard = () => {
     const profileFields = [
         { key: 'full_name', label: t('profile.fullName'), value: profile?.full_name },
         { key: 'phone_number', label: t('profile.phone'), value: profile?.phone_number },
-    ].filter(f => f.value !== undefined);
+    ];
+
+    const missingFields = [
+        !profile?.full_name && 'Full Name',
+        !profile?.phone_number && 'Phone Number',
+        !profile?.farm_size && 'Farm Size',
+        !profile?.location && 'Location'
+    ].filter(Boolean);
+
     const completedFields = profileFields.filter(f => f.value).length;
     const completionPercent = profileFields.length > 0 ? Math.round((completedFields / profileFields.length) * 100) : 100;
 
@@ -131,8 +141,7 @@ const FarmerDashboard = () => {
                             </div>
                         )}
                     </div>
-                )}
-                </header>
+                </div>
 
                 {/* Stats Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
@@ -214,7 +223,13 @@ const FarmerDashboard = () => {
                                     const progress = contract.progress || (contract.status === 'completed' ? 100 : 50);
 
                                     return (
-                                        <div key={contract.id} className="card" style={{ padding: '2rem' }}>
+                                        <motion.div
+                                            key={contract.id}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="card"
+                                            style={{ padding: '2rem' }}
+                                        >
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                                                 <div>
                                                     <h3 style={{ fontSize: '1.25rem' }}>{contract.business_name || 'Business Contract'}</h3>
@@ -250,85 +265,86 @@ const FarmerDashboard = () => {
                                                     style={{ height: '100%', background: 'var(--gold)', boxShadow: '0 0 10px var(--gold-glow)' }}
                                                 />
                                             </div>
-                                        </div>
-                                    </motion.div>
-                        ))}
-                </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
                         )}
-            </section>
+                    </section>
 
-            {/* Sidebar */}
-            <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                {/* Market Trends Card */}
-                <div className="card card-farmer" style={{ padding: '2rem', background: 'var(--forest)', color: 'var(--sand)', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'relative', zIndex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                            <TrendingUp className="text-gold" />
-                            <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em' }}>LOCAL ALERTS</span>
-                        </div>
-                        <h3 style={{ color: 'var(--white)', marginBottom: '1rem', fontSize: '1.75rem' }}>Wheat Demand Spike</h3>
-                        <p style={{ fontSize: '1rem', opacity: 0.9, marginBottom: '2rem', lineHeight: 1.6 }}>
-                            Verified buyers in your region are offering 12% above MSP for Organic Wheat.
-                        </p>
-                        <button className="btn btn-primary" style={{ width: '100%' }}>Scan Offers</button>
-                    </div>
-                    {/* Decorative Pattern overlay */}
-                    <div style={{ position: 'absolute', bottom: '-20px', right: '-20px', opacity: 0.1 }}>
-                        <Wheat size={160} />
-                    </div>
-                </div>
-
-                {/* Quality Monitoring Card */}
-                <div className="card card-farmer" style={{ padding: '2rem', background: 'white' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <Microscope className="text-gold" size={24} />
-                            <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--olive)' }}>FIELD ANALYSIS</span>
-                        </div>
-                        <ThermometerSun size={20} className="text-risk" />
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div style={{ background: 'var(--sand-light)', padding: '1.5rem', borderRadius: '16px' }}>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--olive)', marginBottom: '0.5rem' }}>Estimated Yield</div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 400, fontFamily: 'var(--font-heading)' }}>8.5 <span style={{ fontSize: '1rem' }}>qtl/acre</span></div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                            <div style={{ padding: '1rem', border: '1px solid var(--border-light)', borderRadius: '12px' }}>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--olive)', marginBottom: '0.25rem' }}>Moisture</div>
-                                <div style={{ fontWeight: 700 }}>12.4%</div>
+                    {/* Sidebar */}
+                    <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        {/* Market Trends Card */}
+                        <div className="card card-farmer" style={{ padding: '2rem', background: 'var(--forest)', color: 'var(--sand)', position: 'relative', overflow: 'hidden' }}>
+                            <div style={{ position: 'relative', zIndex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                                    <TrendingUp className="text-gold" />
+                                    <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em' }}>LOCAL ALERTS</span>
+                                </div>
+                                <h3 style={{ color: 'var(--white)', marginBottom: '1rem', fontSize: '1.75rem' }}>Wheat Demand Spike</h3>
+                                <p style={{ fontSize: '1rem', opacity: 0.9, marginBottom: '2rem', lineHeight: 1.6 }}>
+                                    Verified buyers in your region are offering 12% above MSP for Organic Wheat.
+                                </p>
+                                <button className="btn btn-primary" style={{ width: '100%' }}>Scan Offers</button>
                             </div>
-                            <div style={{ padding: '1rem', border: '1px solid var(--border-light)', borderRadius: '12px' }}>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--olive)', marginBottom: '0.25rem' }}>Health Status</div>
-                                <div style={{ fontWeight: 700, color: 'var(--olive)' }}>OPTIMAL</div>
+                            {/* Decorative Pattern overlay */}
+                            <div style={{ position: 'absolute', bottom: '-20px', right: '-20px', opacity: 0.1 }}>
+                                <Wheat size={160} />
                             </div>
                         </div>
 
-                        <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.9rem' }}>Full Quality Report</button>
-                    </div>
-                </div>
+                        {/* Quality Monitoring Card */}
+                        <div className="card card-farmer" style={{ padding: '2rem', background: 'white' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <Microscope className="text-gold" size={24} />
+                                    <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--olive)' }}>FIELD ANALYSIS</span>
+                                </div>
+                                <ThermometerSun size={20} className="text-risk" />
+                            </div>
 
-                {/* Completion Card */}
-                {completionPercent < 100 && (
-                    <div className="card card-farmer" style={{
-                        padding: '1.5rem',
-                        background: 'var(--sand-light)',
-                        border: '1px dashed var(--gold)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                            <AlertCircle size={24} className="text-gold" />
-                            <span style={{ fontWeight: 700, color: 'var(--forest)' }}>Complete Profile ({completionPercent}%)</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div style={{ background: 'var(--sand-light)', padding: '1.5rem', borderRadius: '16px' }}>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--olive)', marginBottom: '0.5rem' }}>Estimated Yield</div>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 400, fontFamily: 'var(--font-heading)' }}>8.5 <span style={{ fontSize: '1rem' }}>qtl/acre</span></div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ padding: '1rem', border: '1px solid var(--border-light)', borderRadius: '12px' }}>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--olive)', marginBottom: '0.25rem' }}>Moisture</div>
+                                        <div style={{ fontWeight: 700 }}>12.4%</div>
+                                    </div>
+                                    <div style={{ padding: '1rem', border: '1px solid var(--border-light)', borderRadius: '12px' }}>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--olive)', marginBottom: '0.25rem' }}>Health Status</div>
+                                        <div style={{ fontWeight: 700, color: 'var(--olive)' }}>OPTIMAL</div>
+                                    </div>
+                                </div>
+
+                                <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.9rem' }}>Full Quality Report</button>
+                            </div>
                         </div>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--olive)', marginBottom: '1.25rem' }}>
-                            Verified profiles get priority access to lower interest loans.
-                        </p>
-                        <button onClick={() => navigate('/farmer/register')} className="btn btn-primary" style={{ width: '100%', padding: '0.6rem', fontSize: '0.85rem' }}>Finalize Vault</button>
-                    </div>
-                )}
-            </aside>
+
+                        {/* Completion Card */}
+                        {completionPercent < 100 && (
+                            <div className="card card-farmer" style={{
+                                padding: '1.5rem',
+                                background: 'var(--sand-light)',
+                                border: '1px dashed var(--gold)'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                    <AlertCircle size={24} className="text-gold" />
+                                    <span style={{ fontWeight: 700, color: 'var(--forest)' }}>Complete Profile ({completionPercent}%)</span>
+                                </div>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--olive)', marginBottom: '1.25rem' }}>
+                                    Verified profiles get priority access to lower interest loans.
+                                </p>
+                                <button onClick={() => navigate('/farmer/register')} className="btn btn-primary" style={{ width: '100%', padding: '0.6rem', fontSize: '0.85rem' }}>Finalize Vault</button>
+                            </div>
+                        )}
+                    </aside>
+                </div>
+            </main>
         </div>
-        </div >
     );
 };
 
