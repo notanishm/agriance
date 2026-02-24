@@ -145,20 +145,20 @@ export const AuthProvider = ({ children }) => {
         return { data: { user: testUser }, error: null };
       }
 
-      // Second test user
+      // Second test user - business
       if (email === 'bye@agriance.com' && password === '1234') {
         setLoading(false);
         const testUser = {
           id: '00000000-0000-0000-0000-000000000002',
           email: 'bye@agriance.com',
-          user_metadata: { full_name: 'Test User 2' }
+          user_metadata: { full_name: 'Test Business' }
         };
         setUser(testUser);
         setUserProfile({
           id: '00000000-0000-0000-0000-000000000002',
           email: 'bye@agriance.com',
-          full_name: 'Test User 2',
-          role: 'farmer',
+          full_name: 'Test Business',
+          role: 'business',
           onboarding_completed: true,
           kyc_status: 'verified'
         });
