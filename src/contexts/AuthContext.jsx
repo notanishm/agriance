@@ -145,6 +145,26 @@ export const AuthProvider = ({ children }) => {
         return { data: { user: testUser }, error: null };
       }
 
+      // Second test user
+      if (email === 'bye@agriance.com' && password === '1234') {
+        setLoading(false);
+        const testUser = {
+          id: '00000000-0000-0000-0000-000000000002',
+          email: 'bye@agriance.com',
+          user_metadata: { full_name: 'Test User 2' }
+        };
+        setUser(testUser);
+        setUserProfile({
+          id: '00000000-0000-0000-0000-000000000002',
+          email: 'bye@agriance.com',
+          full_name: 'Test User 2',
+          role: 'farmer',
+          onboarding_completed: true,
+          kyc_status: 'verified'
+        });
+        return { data: { user: testUser }, error: null };
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,

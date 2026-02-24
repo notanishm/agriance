@@ -58,11 +58,12 @@ const Login = () => {
   };
 
   // Test user login
-  const handleTestLogin = async () => {
-    setEmail('hello@agriance.com');
+  const handleTestLogin = async (email) => {
+    const testEmail = email || 'hello@agriance.com';
+    setEmail(testEmail);
     setPassword('1234');
     setIsLoading(true);
-    const { error } = await signIn('hello@agriance.com', '1234');
+    const { error } = await signIn(testEmail, '1234');
     if (!error) {
       navigate('/roles', { replace: true });
     } else {
@@ -171,9 +172,14 @@ const Login = () => {
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
 
-          <button type="button" onClick={handleTestLogin} style={{ width: '100%', padding: '0.55rem', fontSize: '0.8rem', marginBottom: '1rem', background: 'rgba(22, 101, 52, 0.08)', color: 'var(--primary)', border: '1px dashed var(--primary)', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>
-            Test: hello@agriance.com / 1234
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <button type="button" onClick={() => handleTestLogin('hello@agriance.com')} style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', background: 'rgba(22, 101, 52, 0.08)', color: 'var(--primary)', border: '1px dashed var(--primary)', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>
+              Test 1
+            </button>
+            <button type="button" onClick={() => handleTestLogin('bye@agriance.com')} style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', background: 'rgba(22, 101, 52, 0.08)', color: 'var(--primary)', border: '1px dashed var(--primary)', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>
+              Test 2
+            </button>
+          </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
             <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
