@@ -14,19 +14,22 @@ const AuthCallback = () => {
     
     const handleAuthCallback = async () => {
       try {
-        // Check for session - Supabase stores it automatically after OAuth redirect
+        // Get session from URL hash (Supabase stores it there after OAuth)
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error) throw error;
+        console.log('Session:', session, 'Error:', error);
+        
+        if (error) {
+          console.error('Session error:', error);
+          // Try to continue anyway
+        }
         
         if (session && isMounted) {
           setStatus('success');
           setMessage('Authentication successful! Redirecting...');
           
-          // Small delay to ensure session is fully processed
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          // Get user profile to determine role - be resilient to errors
           try {
             const { data: profile } = await supabase
               .from('profiles')
@@ -42,13 +45,13 @@ const AuthCallback = () => {
               setTimeout(() => navigate(`/${profile.role}/dashboard`), 1500);
             }
           } catch (err) {
-            // If profile query fails, go to roles
             console.log('Profile query failed, redirecting to roles');
             setTimeout(() => navigate('/roles'), 1500);
           }
         } else if (isMounted) {
-          // No session - try to listen for auth changes (for OAuth)
+          // Listen for auth changes
           const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('Auth event:', event, 'Session:', session);
             if (event === 'SIGNED_IN' && session && isMounted) {
               subscription.unsubscribe();
               setStatus('success');
@@ -76,14 +79,14 @@ const AuthCallback = () => {
             }
           });
           
-          // If no session after 3 seconds, show error
+          // Extended timeout for OAuth
           setTimeout(() => {
             if (isMounted && status !== 'success') {
               setStatus('error');
               setMessage('Authentication failed. Please try again.');
               setTimeout(() => navigate('/login'), 2000);
             }
-          }, 3000);
+          }, 5000);
         }
       } catch (error) {
         console.error('Auth callback error:', error);
