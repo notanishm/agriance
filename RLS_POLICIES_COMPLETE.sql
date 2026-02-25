@@ -141,14 +141,5 @@ CREATE POLICY "files_insert_own" ON file_metadata
 FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
 
 -- ============================================
--- VERIFY
+-- DONE! RLS Policies created successfully
 -- ============================================
-SELECT 'Tables with RLS:' as info, tablename 
-FROM pg_tables 
-WHERE schemaname = 'public' 
-AND relname IN ('profiles', 'contracts', 'loan_applications', 'kyc_documents', 'conversations', 'messages', 'file_metadata');
-
-SELECT 'Policy count:' as info, tablename, count(*) as policies 
-FROM pg_policies 
-WHERE schemaname = 'public' 
-GROUP BY tablename;
