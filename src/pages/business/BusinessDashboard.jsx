@@ -9,7 +9,7 @@ import {
     TrendingUp, Users, FileText, Building2, Phone, Mail
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
+import { fetchService } from '../../services/fetchService';
 
 const BusinessDashboard = () => {
     const { t } = useTranslation();
@@ -19,26 +19,15 @@ const BusinessDashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchFarmers = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('id, full_name, phone_number, location, kyc_status')
-                    .eq('role', 'farmer')
-                    .limit(10);
-                
-                if (!error && data) {
-                    setFarmers(data);
-                }
-            } catch (err) {
-                console.error('Error fetching farmers:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchFarmers();
+        loadFarmers();
     }, []);
+
+    const loadFarmers = async () => {
+        setLoading(true);
+        const data = await fetchService.getFarmers(10);
+        setFarmers(data || []);
+        setLoading(false);
+    };
 
     const menuItems = [
         { id: 'pipeline', label: 'Procurement Flow', icon: <TrendingUp size={20} />, path: '/business/pipeline' },

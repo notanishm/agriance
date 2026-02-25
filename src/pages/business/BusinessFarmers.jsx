@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Users, MapPin, Phone, MessageCircle, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { fetchService } from '../../services/fetchService';
 import { useAuth } from '../../contexts/AuthContext';
 import ContractFlow from './ContractFlow';
 
@@ -13,25 +13,14 @@ const BusinessFarmers = () => {
   const [selectedFarmer, setSelectedFarmer] = useState(null);
 
   useEffect(() => {
-    fetchFarmers();
+    loadFarmers();
   }, []);
 
-  const fetchFarmers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, phone_number, location, kyc_status')
-        .eq('role', 'farmer')
-        .limit(20);
-      
-      if (!error && data) {
-        setFarmers(data);
-      }
-    } catch (err) {
-      console.error('Error fetching farmers:', err);
-    } finally {
-      setLoading(false);
-    }
+  const loadFarmers = async () => {
+    setLoading(true);
+    const data = await fetchService.getFarmers(20);
+    setFarmers(data || []);
+    setLoading(false);
   };
 
   if (selectedFarmer) {
