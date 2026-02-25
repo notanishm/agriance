@@ -6,15 +6,39 @@ import {
     Plus, Search, MapPin, Star, Filter,
     ArrowRight, CheckCircle, Globe, Banknote,
     ShieldCheck, ChevronDown, Landmark, Briefcase,
-    TrendingUp, Users, FileText, Building2
+    TrendingUp, Users, FileText, Building2, Phone, Mail
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 
 const BusinessDashboard = () => {
     const { t } = useTranslation();
     const { user, userProfile } = useAuth();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const [farmers, setFarmers] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchFarmers = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, phone_number, location, kyc_status')
+                    .eq('role', 'farmer')
+                    .limit(10);
+                
+                if (!error && data) {
+                    setFarmers(data);
+                }
+            } catch (err) {
+                console.error('Error fetching farmers:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFarmers();
+    }, []);
 
     const menuItems = [
         { id: 'pipeline', label: 'Procurement Flow', icon: <TrendingUp size={20} />, path: '/business/pipeline' },
@@ -24,7 +48,7 @@ const BusinessDashboard = () => {
 
     const stats = [
         { label: 'Active Contracts', value: '0', icon: <FileText size={18} />, color: 'var(--forest)', path: '/business/pipeline' },
-        { label: 'Farmers Connected', value: '0', icon: <Users size={18} />, color: 'var(--gold)', path: '/business/farmers' },
+        { label: 'Farmers Connected', value: farmers.length.toString(), icon: <Users size={18} />, color: 'var(--gold)', path: '/business/farmers' },
         { label: 'Total Sourcing', value: '₹0', icon: <Banknote size={18} />, color: 'var(--olive)', path: '/business/profile' },
     ];
 
@@ -100,25 +124,73 @@ const BusinessDashboard = () => {
                 </div>
             </div>
 
-            {/* Marketplace Placeholder */}
+            {/* Farmer Marketplace */}
             <div>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Farmer Marketplace</h2>
-                <motion.div
-                    whileHover={{ scale: 1.01 }}
-                    onClick={() => navigate('/business/farmers')}
-                    style={{
-                        background: 'var(--bg-card)',
-                        padding: '3rem',
-                        borderRadius: '12px',
-                        textAlign: 'center',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                        cursor: 'pointer'
-                    }}
-                >
-                    <Users size={48} color="var(--gold)" style={{ opacity: 0.5, marginBottom: '1rem' }} />
-                    <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>No Farmers Yet</h3>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Browse the farmer network to find suppliers</p>
-                </motion.div>
+                {loading ? (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Loading farmers...</div>
+                ) : farmers.length > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                        {farmers.map((farmer) => (
+                            <motion.div
+                                key={farmer.id}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                whileHover={{ scale: 1.02 }}
+                                style={{
+                                    background: 'var(--bg-card)',
+                                    padding: '1.25rem',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => navigate('/business/farmers')}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                                    <div>
+                                        <h3 style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{farmer.full_name || 'Farmer'}</h3>
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                            <MapPin size={14} /> {farmer.location || 'Location not set'}
+                                        </p>
+                                    </div>
+                                    <div style={{
+                                        padding: '0.25rem 0.5rem',
+                                        borderRadius: '4px',
+                                        fontSize: '0.7rem',
+                                        background: farmer.kyc_status === 'verified' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(234, 179, 8, 0.1)',
+                                        color: farmer.kyc_status === 'verified' ? 'var(--success)' : 'var(--gold)'
+                                    }}>
+                                        {farmer.kyc_status === 'verified' ? 'Verified' : 'Pending'}
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                    {farmer.phone_number && (
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                            <Phone size={14} /> {farmer.phone_number}
+                                        </span>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                ) : (
+                    <motion.div
+                        whileHover={{ scale: 1.01 }}
+                        onClick={() => navigate('/business/farmers')}
+                        style={{
+                            background: 'var(--bg-card)',
+                            padding: '3rem',
+                            borderRadius: '12px',
+                            textAlign: 'center',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <Users size={48} color="var(--gold)" style={{ opacity: 0.5, marginBottom: '1rem' }} />
+                        <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>No Farmers Yet</h3>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Browse the farmer network to find suppliers</p>
+                    </motion.div>
+                )}
             </div>
         </div>
     );
