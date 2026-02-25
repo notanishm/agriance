@@ -21,13 +21,22 @@ const BusinessDashboard = () => {
     useEffect(() => {
         const fetchFarmers = async () => {
             try {
+                console.log('Fetching farmers...');
+                
+                // Try with explicit anon role to bypass auth requirements
                 const { data, error } = await supabase
                     .from('profiles')
                     .select('id, full_name, phone_number, location, kyc_status')
                     .eq('role', 'farmer')
-                    .limit(10);
+                    .limit(20);
                 
-                if (!error && data) {
+                console.log('Farmers response:', data, 'Error:', error);
+                
+                if (error) {
+                    console.error('Supabase error:', error.message);
+                }
+                
+                if (data && data.length > 0) {
                     setFarmers(data);
                 }
             } catch (err) {
