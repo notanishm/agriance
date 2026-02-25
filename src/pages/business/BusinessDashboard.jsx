@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
     Plus, Search, MapPin, Star, Filter,
     ArrowRight, CheckCircle, Globe, Banknote,
     ShieldCheck, ChevronDown, Landmark, Briefcase,
-    TrendingUp, Users, FileText, Building2, Phone, Mail, MessageCircle
+    TrendingUp, Users, FileText, Building2, Phone, Mail
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import ChatWidget from '../../components/ChatWidget';
 
 const BusinessDashboard = () => {
     const { t } = useTranslation();
@@ -18,30 +17,26 @@ const BusinessDashboard = () => {
     const navigate = useNavigate();
     const [farmers, setFarmers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showChat, setShowChat] = useState(false);
-
-    const fetchFarmers = async () => {
-        setLoading(true);
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('id, full_name, phone_number, location, kyc_status')
-                .eq('role', 'farmer')
-                .limit(10);
-            
-            if (!error && data) {
-                setFarmers(data);
-            } else if (error) {
-                console.error('Supabase error:', error);
-            }
-        } catch (err) {
-            console.error('Error fetching farmers:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
+        const fetchFarmers = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, phone_number, location, kyc_status')
+                    .eq('role', 'farmer')
+                    .limit(10);
+                
+                if (!error && data) {
+                    setFarmers(data);
+                }
+            } catch (err) {
+                console.error('Error fetching farmers:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchFarmers();
     }, []);
 
@@ -53,7 +48,7 @@ const BusinessDashboard = () => {
 
     const stats = [
         { label: 'Active Contracts', value: '0', icon: <FileText size={18} />, color: 'var(--forest)', path: '/business/pipeline' },
-        { label: 'Farmers Connected', value: farmers.length > 0 ? farmers.length.toString() : '0', icon: <Users size={18} />, color: 'var(--gold)', path: '/business/farmers' },
+        { label: 'Farmers Connected', value: farmers.length.toString(), icon: <Users size={18} />, color: 'var(--gold)', path: '/business/farmers' },
         { label: 'Total Sourcing', value: '₹0', icon: <Banknote size={18} />, color: 'var(--olive)', path: '/business/profile' },
     ];
 
@@ -197,43 +192,6 @@ const BusinessDashboard = () => {
                     </motion.div>
                 )}
             </div>
-
-            {/* Chat Floating Button */}
-            <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setShowChat(!showChat)}
-                style={{
-                    position: 'fixed',
-                    bottom: '20px',
-                    right: '20px',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    background: 'var(--forest)',
-                    color: 'white',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 20px rgba(14, 46, 33, 0.4)',
-                    zIndex: 999,
-                }}
-            >
-                <MessageCircle size={28} />
-            </motion.button>
-
-            {/* Chat Widget */}
-            <AnimatePresence>
-                {showChat && user && (
-                    <ChatWidget
-                        currentUserId={user.id}
-                        currentUserRole={userProfile?.role}
-                        onClose={() => setShowChat(false)}
-                    />
-                )}
-            </AnimatePresence>
         </div>
     );
 };
