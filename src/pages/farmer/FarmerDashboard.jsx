@@ -41,25 +41,25 @@ const FarmerDashboard = () => {
                 setLoading(true);
                 setError(null);
 
+                // Fetch farmer contracts - don't throw on error, just set empty
                 const { data: contractsData, error: contractsError } = await farmerService.getFarmerContracts(user.id);
-                if (contractsError) throw contractsError;
-                setContracts(contractsData || []);
+                if (!contractsError) setContracts(contractsData || []);
 
+                // Fetch farmer loans - don't throw on error
                 const { data: loansData, error: loansError } = await farmerService.getFarmerLoans(user.id);
-                if (loansError) throw loansError;
-                setLoans(loansData || []);
+                if (!loansError) setLoans(loansData || []);
 
-                // Fetch available postings
+                // Fetch available postings - don't throw on error
                 const { data: postingsData, error: postingsError } = await farmerService.getAvailablePostings();
                 if (!postingsError) setPostings(postingsData || []);
 
+                // Fetch farmer profile - don't throw on error
                 const { data: profileData, error: profileError } = await farmerService.getFarmerProfile(user.id);
-                if (profileError) throw profileError;
-                setProfile(profileData);
+                if (!profileError) setProfile(profileData);
 
             } catch (err) {
                 console.error('Error fetching farmer data:', err);
-                setError(err.message);
+                // Don't set error - just continue with empty data
             } finally {
                 setLoading(false);
             }
