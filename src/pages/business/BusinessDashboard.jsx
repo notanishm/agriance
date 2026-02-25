@@ -19,40 +19,23 @@ const BusinessDashboard = () => {
     const [farmers, setFarmers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showChat, setShowChat] = useState(false);
-    const [error, setError] = useState(null);
 
-    const fetchFarmers = async (retryCount = 0) => {
+    const fetchFarmers = async () => {
         setLoading(true);
-        setError(null);
-        
         try {
-            console.log('Testing Supabase connection...');
-            
-            const { data, error: fetchError } = await supabase
+            const { data, error } = await supabase
                 .from('profiles')
-                .select('id, full_name, phone_number, location, kyc_status, role')
+                .select('id, full_name, phone_number, location, kyc_status')
                 .eq('role', 'farmer')
-                .limit(20);
-
-            console.log('Supabase response:', { data, error: fetchError });
-
-            if (fetchError) {
-                if (retryCount < 2) {
-                    await new Promise(r => setTimeout(r, 1500));
-                    return fetchFarmers(retryCount + 1);
-                }
-                setError(fetchError.message);
-                return;
+                .limit(10);
+            
+            if (!error && data) {
+                setFarmers(data);
+            } else if (error) {
+                console.error('Supabase error:', error);
             }
-
-            setFarmers(data || []);
         } catch (err) {
-            console.error('Fetch error:', err);
-            setError('Connection failed. Check network.');
-            if (retryCount < 2) {
-                await new Promise(r => setTimeout(r, 1500));
-                return fetchFarmers(retryCount + 1);
-            }
+            console.error('Error fetching farmers:', err);
         } finally {
             setLoading(false);
         }
@@ -151,30 +134,6 @@ const BusinessDashboard = () => {
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Farmer Marketplace</h2>
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Loading farmers...</div>
-                ) : error ? (
-                    <motion.div
-                        style={{
-                            background: 'var(--bg-card)',
-                            padding: '2rem',
-                            borderRadius: '12px',
-                            textAlign: 'center',
-                        }}
-                    >
-                        <p style={{ color: 'var(--error)', marginBottom: '1rem' }}>{error}</p>
-                        <button 
-                            onClick={() => fetchFarmers()}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                background: 'var(--forest)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            Retry
-                        </button>
-                    </motion.div>
                 ) : farmers.length > 0 ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
                         {farmers.map((farmer) => (
