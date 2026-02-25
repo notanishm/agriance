@@ -104,4 +104,32 @@ export const PublicRoute = ({ children }) => {
   return children;
 };
 
+/**
+ * Role Selection Route Component
+ * Only accessible to authenticated users without a role
+ */
+export const RoleSelectionRoute = ({ children }) => {
+  const { user, userProfile, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  // Must be logged in
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // If user already has a role, redirect to their dashboard
+  if (userProfile?.role) {
+    if (userProfile.onboarding_completed) {
+      return <Navigate to={`/${userProfile.role}/dashboard`} replace />;
+    } else {
+      return <Navigate to={`/${userProfile.role}/register`} replace />;
+    }
+  }
+
+  return children;
+};
+
 export default ProtectedRoute;

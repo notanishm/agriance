@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
+import { ProtectedRoute, PublicRoute, RoleSelectionRoute } from './components/ProtectedRoute';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import LandingPage from './pages/LandingPage';
@@ -65,7 +65,7 @@ const AppContent = () => {
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
             <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/roles" element={<RoleSelection />} />
+            <Route path="/roles" element={<RoleSelectionRoute><RoleSelection /></RoleSelectionRoute>} />
             <Route path="/farmer/contracts" element={<ProtectedRoute requiredRole="farmer"><FarmerContracts /></ProtectedRoute>} />
             <Route path="/farmer/loans" element={<ProtectedRoute requiredRole="farmer"><FarmerLoans /></ProtectedRoute>} />
             <Route path="/farmer/profile" element={<ProtectedRoute requiredRole="farmer"><FarmerProfile /></ProtectedRoute>} />

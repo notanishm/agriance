@@ -1,12 +1,33 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useTranslation } from '../contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Sprout, Building2, ChevronRight, Landmark, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const RoleSelection = () => {
     const { t, language } = useTranslation();
     const navigate = useNavigate();
+    const { userProfile, loading } = useAuth();
+
+    // Redirect if user already has a role
+    useEffect(() => {
+        if (!loading && userProfile?.role) {
+            if (userProfile.onboarding_completed) {
+                navigate(`/${userProfile.role}/dashboard`, { replace: true });
+            } else {
+                navigate(`/${userProfile.role}/register`, { replace: true });
+            }
+        }
+    }, [userProfile, loading, navigate]);
+
+    if (loading || !userProfile) {
+        return (
+            <div className="agri-pattern" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center' }}>Loading...</div>
+            </div>
+        );
+    }
 
     const roles = useMemo(() => [
         {
