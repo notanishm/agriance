@@ -19,39 +19,43 @@ const BusinessDashboard = () => {
     const [farmers, setFarmers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showChat, setShowChat] = useState(false);
+    const [error, setError] = useState(null);
+
+    const fetchFarmers = async (retryCount = 0) => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const { data, error: fetchError } = await supabase
+                .from('profiles')
+                .select('id, full_name, phone_number, location, kyc_status, role')
+                .eq('role', 'farmer')
+                .limit(20);
+
+            if (fetchError) {
+                if (fetchError.message.includes('network') || fetchError.code === 'PGRST301') {
+                    if (retryCount < 3) {
+                        await new Promise(r => setTimeout(r, 1000 * (retryCount + 1)));
+                        return fetchFarmers(retryCount + 1);
+                    }
+                }
+                setError(fetchError.message);
+                return;
+            }
+
+            setFarmers(data || []);
+        } catch (err) {
+            setError(err.message);
+            if (retryCount < 3) {
+                await new Promise(r => setTimeout(r, 1000 * (retryCount + 1)));
+                return fetchFarmers(retryCount + 1);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchFarmers = async () => {
-            try {
-                console.log('Fetching farmers...');
-                
-                // First, let's see all profiles to debug
-                const { data: allData, error: allError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .limit(20);
-                
-                console.log('All profiles:', allData, 'Error:', allError);
-                
-                // Now try to get farmers specifically
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('id, full_name, phone_number, location, kyc_status, role')
-                    .eq('role', 'farmer')
-                    .limit(20);
-                
-                console.log('Farmers response:', data, 'Error:', error);
-                
-                if (data && data.length > 0) {
-                    setFarmers(data);
-                }
-            } catch (err) {
-                console.error('Error fetching farmers:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchFarmers();
     }, []);
 
@@ -144,6 +148,30 @@ const BusinessDashboard = () => {
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Farmer Marketplace</h2>
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Loading farmers...</div>
+                ) : error ? (
+                    <motion.div
+                        style={{
+                            background: 'var(--bg-card)',
+                            padding: '2rem',
+                            borderRadius: '12px',
+                            textAlign: 'center',
+                        }}
+                    >
+                        <p style={{ color: 'var(--error)', marginBottom: '1rem' }}>{error}</p>
+                        <button 
+                            onClick={() => fetchFarmers()}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                background: 'var(--forest)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Retry
+                        </button>
+                    </motion.div>
                 ) : farmers.length > 0 ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
                         {farmers.map((farmer) => (
