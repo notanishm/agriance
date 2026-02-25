@@ -26,18 +26,21 @@ const BusinessDashboard = () => {
         setError(null);
         
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
             const { data, error: fetchError } = await supabase
                 .from('profiles')
                 .select('id, full_name, phone_number, location, kyc_status, role')
                 .eq('role', 'farmer')
                 .limit(20);
 
+            clearTimeout(timeoutId);
+
             if (fetchError) {
-                if (fetchError.message.includes('network') || fetchError.code === 'PGRST301') {
-                    if (retryCount < 3) {
-                        await new Promise(r => setTimeout(r, 1000 * (retryCount + 1)));
-                        return fetchFarmers(retryCount + 1);
-                    }
+                if ((fetchError.message?.includes('network') || fetchError.code === 'PGRST301') && retryCount < 3) {
+                    await new Promise(r => setTimeout(r, 1000 * (retryCount + 1)));
+                    return fetchFarmers(retryCount + 1);
                 }
                 setError(fetchError.message);
                 return;
@@ -45,8 +48,12 @@ const BusinessDashboard = () => {
 
             setFarmers(data || []);
         } catch (err) {
-            setError(err.message);
-            if (retryCount < 3) {
+            const errorMsg = err.name === 'AbortError' 
+                ? 'Request timed out. Please try again.' 
+                : err.message || 'Network error. Please check your connection.';
+            
+            setError(errorMsg);
+            if (retryCount < 3 && err.name !== 'AbortError') {
                 await new Promise(r => setTimeout(r, 1000 * (retryCount + 1)));
                 return fetchFarmers(retryCount + 1);
             }
