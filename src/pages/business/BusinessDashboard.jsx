@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     Plus, Search, MapPin, Star, Filter,
@@ -12,6 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const BusinessDashboard = () => {
     const { t } = useTranslation();
     const { user, userProfile } = useAuth();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
     const menuItems = [
@@ -21,9 +23,9 @@ const BusinessDashboard = () => {
     ];
 
     const stats = [
-        { label: 'Active Contracts', value: '0', icon: <FileText size={18} />, color: 'var(--forest)' },
-        { label: 'Farmers Connected', value: '0', icon: <Users size={18} />, color: 'var(--gold)' },
-        { label: 'Total Sourcing', value: '₹0', icon: <Banknote size={18} />, color: 'var(--olive)' },
+        { label: 'Active Contracts', value: '0', icon: <FileText size={18} />, color: 'var(--forest)', path: '/business/pipeline' },
+        { label: 'Farmers Connected', value: '0', icon: <Users size={18} />, color: 'var(--gold)', path: '/business/farmers' },
+        { label: 'Total Sourcing', value: '₹0', icon: <Banknote size={18} />, color: 'var(--olive)', path: '/business/profile' },
     ];
 
     return (
@@ -44,6 +46,8 @@ const BusinessDashboard = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
+                        onClick={() => navigate(stat.path)}
+                        whileHover={{ scale: 1.02, cursor: 'pointer' }}
                         style={{
                             background: 'var(--bg-card)',
                             padding: '1.25rem',
@@ -73,7 +77,7 @@ const BusinessDashboard = () => {
                             key={item.id}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => window.location.href = item.path}
+                            onClick={() => navigate(item.path)}
                             style={{
                                 background: 'var(--bg-card)',
                                 border: 'none',
@@ -99,17 +103,22 @@ const BusinessDashboard = () => {
             {/* Marketplace Placeholder */}
             <div>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Farmer Marketplace</h2>
-                <div style={{
-                    background: 'var(--bg-card)',
-                    padding: '3rem',
-                    borderRadius: '12px',
-                    textAlign: 'center',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                }}>
+                <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    onClick={() => navigate('/business/farmers')}
+                    style={{
+                        background: 'var(--bg-card)',
+                        padding: '3rem',
+                        borderRadius: '12px',
+                        textAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        cursor: 'pointer'
+                    }}
+                >
                     <Users size={48} color="var(--gold)" style={{ opacity: 0.5, marginBottom: '1rem' }} />
                     <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>No Farmers Yet</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Browse the farmer network to find suppliers</p>
-                </div>
+                </motion.div>
             </div>
         </div>
     );

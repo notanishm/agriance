@@ -28,9 +28,9 @@ const FarmerDashboard = () => {
     ];
 
     const stats = [
-        { label: 'Active Contracts', value: '0', icon: <FileCheck size={18} />, color: 'var(--forest)' },
-        { label: 'Pending Offers', value: '0', icon: <Bell size={18} />, color: 'var(--gold)' },
-        { label: 'Total Earnings', value: '₹0', icon: <Wallet size={18} />, color: 'var(--olive)' },
+        { label: 'Active Contracts', value: '0', icon: <FileCheck size={18} />, color: 'var(--forest)', path: '/farmer/contracts' },
+        { label: 'Pending Offers', value: '0', icon: <Bell size={18} />, color: 'var(--gold)', path: '/farmer/contracts' },
+        { label: 'Total Earnings', value: '₹0', icon: <Wallet size={18} />, color: 'var(--olive)', path: '/farmer/loans' },
     ];
 
     return (
@@ -51,6 +51,8 @@ const FarmerDashboard = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
+                        onClick={() => navigate(stat.path)}
+                        whileHover={{ scale: 1.02, cursor: 'pointer' }}
                         style={{
                             background: 'var(--bg-card)',
                             padding: '1.25rem',
@@ -106,17 +108,22 @@ const FarmerDashboard = () => {
             {/* Active Contracts Placeholder */}
             <div>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Active Contracts</h2>
-                <div style={{
-                    background: 'var(--bg-card)',
-                    padding: '3rem',
-                    borderRadius: '12px',
-                    textAlign: 'center',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                }}>
+                <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    onClick={() => navigate('/farmer/contracts')}
+                    style={{
+                        background: 'var(--bg-card)',
+                        padding: '3rem',
+                        borderRadius: '12px',
+                        textAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        cursor: 'pointer'
+                    }}
+                >
                     <FileCheck size={48} color="var(--gold)" style={{ opacity: 0.5, marginBottom: '1rem' }} />
                     <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>No Active Contracts</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Check the Requirements tab to find contract opportunities</p>
-                </div>
+                </motion.div>
             </div>
         </div>
     );
