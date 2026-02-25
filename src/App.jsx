@@ -18,6 +18,13 @@ import BankOnboarding from './pages/bank/BankOnboarding';
 import BankDashboard from './pages/bank/BankDashboard';
 import { ShieldCheck } from 'lucide-react';
 import AuthCallback from './pages/AuthCallback';
+import FarmerContracts from './pages/farmer/FarmerContracts';
+import FarmerLoans from './pages/farmer/FarmerLoans';
+import FarmerProfile from './pages/farmer/FarmerProfile';
+import BusinessPipeline from './pages/business/BusinessPipeline';
+import BusinessFarmers from './pages/business/BusinessFarmers';
+import BusinessProfile from './pages/business/BusinessProfile';
+import NotFound from './pages/NotFound';
 
 const AppContent = () => {
   const { user, loading } = useAuth();
@@ -59,6 +66,14 @@ const AppContent = () => {
             <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/roles" element={<RoleSelection />} />
+            <Route path="/farmer/contracts" element={<ProtectedRoute requiredRole="farmer"><FarmerContracts /></ProtectedRoute>} />
+            <Route path="/farmer/loans" element={<ProtectedRoute requiredRole="farmer"><FarmerLoans /></ProtectedRoute>} />
+            <Route path="/farmer/profile" element={<ProtectedRoute requiredRole="farmer"><FarmerProfile /></ProtectedRoute>} />
+            <Route path="/business/pipeline" element={<ProtectedRoute requiredRole="business"><BusinessPipeline /></ProtectedRoute>} />
+            <Route path="/business/farmers" element={<ProtectedRoute requiredRole="business"><BusinessFarmers /></ProtectedRoute>} />
+            <Route path="/business/profile" element={<ProtectedRoute requiredRole="business"><BusinessProfile /></ProtectedRoute>} />
+            <Route path="/404" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
 
             {/* Onboarding routes - require authentication */}
             <Route
