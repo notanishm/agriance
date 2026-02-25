@@ -9,6 +9,7 @@ const handleError = (error, context) => {
 export const fetchService = {
     // Fetch farmers for business dashboard/marketplace
     async getFarmers(limit = 20) {
+        console.log('Fetching farmers...');
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -16,9 +17,11 @@ export const fetchService = {
                 .eq('role', 'farmer')
                 .limit(limit);
             
+            console.log('Farmers response:', { data, error });
             if (error) return handleError(error, 'getFarmers');
             return data || [];
         } catch (err) {
+            console.error('getFarmers error:', err);
             return handleError(err, 'getFarmers');
         }
     },
