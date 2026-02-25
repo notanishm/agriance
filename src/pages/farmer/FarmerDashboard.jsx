@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Bell,
     Wallet,
@@ -11,15 +11,54 @@ import {
     ShieldCheck,
     AlertCircle,
     ArrowRight,
-    Sprout
+    Sprout,
+    MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import ChatWidget from '../../components/ChatWidget';
+import { supabase } from '../../lib/supabase';
 
 const FarmerDashboard = () => {
     const { t } = useTranslation();
     const { user, userProfile } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [showChat, setShowChat] = useState(false);
+    const [chatAvailable, setChatAvailable] = useState(false);
+
+    useEffect(() => {
+        checkChatAvailability();
+    }, [user]);
+
+    const checkChatAvailability = async () => {
+        if (!user) return;
+        
+        try {
+            const { data: contracts } = await supabase
+                .from('contracts')
+                .select('id, business_id')
+                .eq('farmer_id', user.id)
+                .in('status', ['active', 'pending', 'accepted'])
+                .limit(1);
+
+            if (contracts && contracts.length > 0) {
+                setChatAvailable(true);
+                return;
+            }
+
+            const { data: conversations } = await supabase
+                .from('conversations')
+                .select('id')
+                .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
+                .limit(1);
+
+            if (conversations && conversations.length > 0) {
+                setChatAvailable(true);
+            }
+        } catch (err) {
+            console.error('Error checking chat availability:', err);
+        }
+    };
 
     const menuItems = [
         { id: 'contracts', label: 'Trade Handshakes', icon: <FileCheck size={20} />, path: '/farmer/contracts' },
@@ -125,6 +164,46 @@ const FarmerDashboard = () => {
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Check the Requirements tab to find contract opportunities</p>
                 </motion.div>
             </div>
+
+            {/* Chat Button - Only show if farmer has contracts or existing conversations */}
+            {chatAvailable && (
+                <>
+                    <motion.button
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        onClick={() => setShowChat(true)}
+                        style={{
+                            position: 'fixed',
+                            bottom: '20px',
+                            right: '20px',
+                            width: '60px',
+                            height: '60px',
+                            borderRadius: '50%',
+                            background: 'var(--forest)',
+                            border: 'none',
+                            color: 'white',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 20px rgba(14, 46, 33, 0.4)',
+                            zIndex: 999,
+                        }}
+                    >
+                        <MessageCircle size={28} />
+                    </motion.button>
+
+                    <AnimatePresence>
+                        {showChat && user && (
+                            <ChatWidget
+                                currentUserId={user.id}
+                                currentUserRole={userProfile?.role}
+                                onClose={() => setShowChat(false)}
+                            />
+                        )}
+                    </AnimatePresence>
+                </>
+            )}
         </div>
     );
 };

@@ -410,9 +410,128 @@ export const dbUtils = {
   },
 };
 
+// Chat/Messaging Service
+export const chatService = {
+  // Get or create conversation with a user
+  async getOrCreateConversation(currentUserId, otherUserId) {
+    try {
+      // Check if conversation exists
+      const { data: existing } = await supabase
+        .from('conversations')
+        .select('*')
+        .or(`and(participant_1.eq.${currentUserId},participant_2.eq.${otherUserId}),and(participant_1.eq.${otherUserId},participant_2.eq.${currentUserId})`)
+        .single();
+
+      if (existing) {
+        return { data: existing, error: null };
+      }
+
+      // Create new conversation
+      const { data, error } = await supabase
+        .from('conversations')
+        .insert({
+          participant_1: currentUserId,
+          participant_2: otherUserId,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error: handleSupabaseError(error) };
+    }
+  },
+
+  // Get all conversations for a user
+  async getConversations(userId) {
+    try {
+      const { data, error } = await supabase
+        .from('conversations')
+        .select(`
+          *,
+          participant_1:profiles!participant_1(id, full_name, role),
+          participant_2:profiles!participant_2(id, full_name, role),
+          messages:messages(last_message:created_at, last_content:content)
+        `)
+        .or(`participant_1.eq.${userId},participant_2.eq.${userId}`)
+        .order('last_message_at', { ascending: false });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error: handleSupabaseError(error) };
+    }
+  },
+
+  // Get messages in a conversation
+  async getMessages(conversationId, limit = 50) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select(`
+          *,
+          sender:profiles(id, full_name, role)
+        `)
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true })
+        .limit(limit);
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error: handleSupabaseError(error) };
+    }
+  },
+
+  // Send a message
+  async sendMessage(conversationId, senderId, content) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: senderId,
+          content: content,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update conversation last_message_at
+      await supabase
+        .from('conversations')
+        .update({ last_message_at: new Date().toISOString() })
+        .eq('id', conversationId);
+
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error: handleSupabaseError(error) };
+    }
+  },
+
+  // Mark messages as read
+  async markAsRead(conversationId, userId) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .update({ is_read: true })
+        .eq('conversation_id', conversationId)
+        .neq('sender_id', userId);
+
+      if (error) throw error;
+      return { data: error ? null : true, error: null };
+    } catch (error) {
+      return { data: null, error: handleSupabaseError(error) };
+    }
+  },
+};
+
 export default {
   farmer: farmerService,
   business: businessService,
   bank: bankService,
+  chat: chatService,
   utils: dbUtils,
 };
