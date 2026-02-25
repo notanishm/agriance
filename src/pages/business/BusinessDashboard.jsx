@@ -23,18 +23,22 @@ const BusinessDashboard = () => {
             try {
                 console.log('Fetching farmers...');
                 
-                // Try with explicit anon role to bypass auth requirements
+                // First, let's see all profiles to debug
+                const { data: allData, error: allError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .limit(20);
+                
+                console.log('All profiles:', allData, 'Error:', allError);
+                
+                // Now try to get farmers specifically
                 const { data, error } = await supabase
                     .from('profiles')
-                    .select('id, full_name, phone_number, location, kyc_status')
+                    .select('id, full_name, phone_number, location, kyc_status, role')
                     .eq('role', 'farmer')
                     .limit(20);
                 
                 console.log('Farmers response:', data, 'Error:', error);
-                
-                if (error) {
-                    console.error('Supabase error:', error.message);
-                }
                 
                 if (data && data.length > 0) {
                     setFarmers(data);
@@ -57,7 +61,7 @@ const BusinessDashboard = () => {
 
     const stats = [
         { label: 'Active Contracts', value: '0', icon: <FileText size={18} />, color: 'var(--forest)', path: '/business/pipeline' },
-        { label: 'Farmers Connected', value: farmers.length.toString(), icon: <Users size={18} />, color: 'var(--gold)', path: '/business/farmers' },
+        { label: 'Farmers Connected', value: farmers.length > 0 ? farmers.length.toString() : '0', icon: <Users size={18} />, color: 'var(--gold)', path: '/business/farmers' },
         { label: 'Total Sourcing', value: '₹0', icon: <Banknote size={18} />, color: 'var(--olive)', path: '/business/profile' },
     ];
 
