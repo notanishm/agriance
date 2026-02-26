@@ -16,16 +16,25 @@ const BusinessDashboard = () => {
     const { user, userProfile } = useAuth();
     const navigate = useNavigate();
     const [farmers, setFarmers] = useState([]);
+    const [contracts, setContracts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        loadFarmers();
-    }, []);
+        loadData();
+    }, [user]);
 
-    const loadFarmers = async () => {
+    const loadData = async () => {
         setLoading(true);
-        const data = await fetchService.getFarmers(10);
-        setFarmers(data || []);
+        try {
+            const [farmersData, contractsData] = await Promise.all([
+                fetchService.getFarmers(10),
+                user ? fetchService.getContracts(user.id, 'business') : Promise.resolve([])
+            ]);
+            setFarmers(farmersData || []);
+            setContracts(contractsData || []);
+        } catch (err) {
+            console.error('Error loading data:', err);
+        }
         setLoading(false);
     };
 
@@ -33,6 +42,12 @@ const BusinessDashboard = () => {
         { id: 'pipeline', label: 'Procurement Flow', icon: <TrendingUp size={20} />, path: '/business/pipeline' },
         { id: 'farmers', label: 'Ecosystem Network', icon: <Users size={20} />, path: '/business/farmers' },
         { id: 'profile', label: 'Institutional ID', icon: <Building2 size={20} />, path: '/business/profile' },
+    ];
+
+    const stats = [
+        { label: 'Active Contracts', value: contracts.filter(c => c.status === 'active').length.toString(), icon: <FileText size={18} />, color: 'var(--forest)', path: '/business/pipeline' },
+        { label: 'Farmers Connected', value: farmers.length.toString(), icon: <Users size={18} />, color: 'var(--gold)', path: '/business/farmers' },
+        { label: 'Total Sourcing', value: '₹' + (contracts.reduce((sum, c) => sum + (c.total_value || 0), 0)).toLocaleString(), icon: <Banknote size={18} />, color: 'var(--olive)', path: '/business/profile' },
     ];
 
     const stats = [

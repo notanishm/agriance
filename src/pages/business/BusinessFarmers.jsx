@@ -29,7 +29,7 @@ const BusinessFarmers = () => {
         farmer={selectedFarmer}
         onComplete={() => {
           setSelectedFarmer(null);
-          fetchFarmers();
+          loadFarmers();
         }}
         onClose={() => setSelectedFarmer(null)}
       />
