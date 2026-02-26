@@ -7,16 +7,18 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  global: {
-    fetch: (url, options) => {
-      return fetch(url, {
-        ...options,
-        mode: 'cors',
-      });
-    },
-  },
-});
+const isDev = import.meta.env.DEV;
+
+export const supabase = createClient(
+  isDev ? '/api/supabase' : supabaseUrl,
+  supabaseAnonKey,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    }
+  }
+);
 
 export const handleSupabaseError = (error) => {
   if (!error) return null;
